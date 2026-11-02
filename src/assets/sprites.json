@@ -185,7 +185,7 @@
   },
   "escopeta": {
     "archivo": "assets/sprites/escopeta.png",
-    "ancho": 96,
+    "ancho": 192,
     "alto": 32,
     "frames": 3,
     "tipo": "sprite",
@@ -196,7 +196,7 @@
           1,
           2
         ],
-        "fps": 24,
+        "fps": 16,
         "repetir": 0
       }
     },

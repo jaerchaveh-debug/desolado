@@ -731,7 +731,9 @@ export default class GameScene extends Phaser.Scene {
         const ataque = this.arma[clave];
 
         if (ataque.tipo === 'carga') {
-            this.empezarCarga(ataque, time);
+            // Sin tiempo de carga, el proyectil sale en el acto
+            if (ataque.carga > 0) this.empezarCarga(ataque, time);
+            else this.lanzarCargado(ataque, time);
             return;
         }
 
@@ -836,9 +838,14 @@ export default class GameScene extends Phaser.Scene {
         if (time < carga.fin) return;
 
         this.cancelarCarga();
+        this.lanzarCargado(carga.ataque, time);
+    }
+
+    // Lanza el proyectil de un ataque de carga (siempre al frente) y empieza su enfriamiento
+    lanzarCargado(ataque, time) {
         const { x, y, direccion } = this.origenDisparo(true);
-        this.lanzarProyectil(carga.ataque.proyectil, x + 6 * direccion.x, y, direccion);
-        this.listoEn.especial = time + carga.ataque.enfriamiento;
+        this.lanzarProyectil(ataque.proyectil, x + 6 * direccion.x, y, direccion);
+        this.listoEn.especial = time + ataque.enfriamiento;
         this.especialAvisado = false;
         this.tajo = { inicio: time, duracion: 150 };   // el arma baja de golpe al lanzar
         this.cameras.main.shake(100, 0.008);

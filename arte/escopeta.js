@@ -1,11 +1,13 @@
 // Disparo de escopeta (tecla Q): estallido instantáneo en cono que nace en la boca del cañón.
-// Orientado a la derecha; el borde izquierdo es la boca del cañón. Frames de 96x32:
+// Orientado a la derecha; el borde izquierdo es la boca del cañón. Frames de (alcance)x32:
 //   0 estallido (núcleo blanco y perdigones de energía)   1 disipándose   2 restos
 // GameScene recorta el ancho con setCrop si un muro corta el alcance.
 
 import { Lienzo, ruido } from '../tools/pixel/lienzo.js';
+import { ARMAS } from '../src/config/combate.js';
 
-const ANCHO = 96;
+// El largo del dibujo es el alcance del ataque: tras cambiarlo, npm run arte escopeta
+const ANCHO = ARMAS.pistola.especial.alcance;
 const ALTO = 32;
 const CY = 16;
 const PERDIGONES = 15;
@@ -62,6 +64,7 @@ export default {
     alto: ALTO,
     frames: () => [estallido(), disipando(), restos()],
     animaciones: {
-        disparo: { frames: [0, 1, 2], fps: 24, repetir: 0 }
+        // 3 frames a 16 fps: ~190 ms
+        disparo: { frames: [0, 1, 2], fps: 16, repetir: 0 }
     }
 };

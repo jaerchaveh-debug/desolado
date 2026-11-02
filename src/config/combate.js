@@ -11,7 +11,7 @@ export const JUGADOR = {
     caida: { altura: 176, danio: 5 },
     // Dash (Shift): impulso horizontal sin gravedad, invulnerable mientras dura. Uno por salto en el aire.
     dash: {
-        distancia: 96,      // px: igual que el alcance del especial de la pistola
+        distancia: 96,      // px
         duracion: 150,      // ms que tarda en recorrerla
         enfriamiento: 800   // ms desde que termina hasta poder repetirlo
     }
@@ -62,7 +62,7 @@ export const ARMAS = {
         especial: {
             tipo: 'estallido',
             danio: 4,           // elimina de un golpe a rastreadores y cuchilleros
-            alcance: 96,        // se acorta si hay un muro
+            alcance: 192,       // se acorta si hay un muro; también el largo de arte/escopeta.js
             ancho: 32,          // más que la bala del ataque normal
             enfriamiento: 6000,
             efecto: 'escopeta',
@@ -84,7 +84,7 @@ export const ARMAS = {
         },
         especial: {
             tipo: 'carga',
-            carga: 600,         // ms inmóvil cargando
+            carga: 0,           // ms inmóvil cargando (0 = la onda sale al instante)
             enfriamiento: 10000,
             soloFrente: true,
             aura: 'carga-espada',
@@ -92,7 +92,7 @@ export const ARMAS = {
             proyectil: {
                 danio: 8,
                 velocidad: 280,
-                alcance: 192,   // el doble que el especial de la pistola
+                alcance: 192,
                 atraviesa: true,
                 sprite: 'onda-espada',
                 animacion: 'onda-espada-viajar',
