@@ -14,11 +14,11 @@ export default {
     // Aparición de enemigos en este capítulo. Cada tipo tiene su propio temporizador, independiente de los demás.
     aparicion: {
         tipos: ['rastreador', 'cuchillero'],
-        intervaloInicial: 5000, // ms entre apariciones de cada tipo al empezar el nivel
+        intervaloInicial: 3500, // ms entre apariciones de cada tipo al empezar el nivel
         cadaMuertes: 5,         // cada N enemigos eliminados de un tipo...
         reduccion: 500,         // ...su intervalo se acorta estos ms...
-        intervaloMinimo: 2000,  // ...hasta este mínimo
-        maximo: 8,              // enemigos vivos a la vez (todos los tipos), para no saturar la pantalla
+        intervaloMinimo: 1500,  // ...hasta este mínimo
+        maximo: 12,             // enemigos vivos a la vez (todos los tipos), para no saturar la pantalla
         distanciaMin: 120,      // px: no aparecer encima del jugador
         distanciaMax: 360,      // px: aparecer cerca para que llegue pronto (el mapa es más ancho que la pantalla)
         // Un enemigo vivo a más de esta distancia del jugador desaparece y reaparece en un punto
@@ -39,7 +39,7 @@ export default {
     jefe: {
         tipo: 'estibador',
         retardo: 1500,
-        refuerzos: { tipos: ['rastreador', 'cuchillero'], intervalo: 5000, maximo: 3 }
+        refuerzos: { tipos: ['rastreador', 'cuchillero'], intervalo: 2000, maximo: 10 }
     },
 
     // Condición para completar el capítulo: 'jefe' = derrotar al jefe. Al cumplirse, GameScene llama a

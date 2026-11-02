@@ -4,7 +4,7 @@ import { ENEMIGOS } from '../config/combate';
 const CAIDA_MAXIMA = 48;   // px que un enemigo de suelo se deja caer (3 tiles); más es un foso
 const ALTURA_ATAQUE = 20;  // px de diferencia vertical máxima con el objetivo para atacarle
 
-// Evento de escena que se emite al eliminar un enemigo, con su tipo como argumento
+// Evento de escena que se emite al eliminar un enemigo, con su tipo y el propio enemigo como argumentos
 export const EVENTO_ELIMINADO = 'enemigo-eliminado';
 
 // Enemigo genérico definido por un tipo de ENEMIGOS (src/config/combate.js).
@@ -128,7 +128,7 @@ export default class Enemigo extends Phaser.Physics.Arcade.Sprite {
     morir() {
         this.vivo = false;
         this.atacando = false;
-        this.scene.events.emit(EVENTO_ELIMINADO, this.tipo);
+        this.scene.events.emit(EVENTO_ELIMINADO, this.tipo, this);
         this.body.enable = false;
         this.anims.resume();
         this.play(`${this.datos.sprite}-morir`);

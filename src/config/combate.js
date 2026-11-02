@@ -6,12 +6,24 @@ export const JUGADOR = {
     vida: 12,
     invulnerabilidad: 1000, // ms sin recibir daño tras un golpe (el sprite parpadea)
     retroceso: { x: 160, y: -180 },  // empujón al recibir daño, alejándolo del atacante
+    // Caída alta: aterrizar tras caer más de 'altura' px (desde el punto más alto en el aire) quita 'danio'.
+    // Caer a un foso sin fondo sigue siendo muerte instantánea.
+    caida: { altura: 176, danio: 5 },
     // Dash (Shift): impulso horizontal sin gravedad, invulnerable mientras dura. Uno por salto en el aire.
     dash: {
         distancia: 96,      // px: igual que el alcance del especial de la pistola
         duracion: 150,      // ms que tarda en recorrerla
         enfriamiento: 800   // ms desde que termina hasta poder repetirlo
     }
+};
+
+// Célula de energía: al morir, cada enemigo tiene 'probabilidad' de soltar una que recupera 'vida' al recogerla
+// (no se recoge con la vida al máximo). Parpadea a los 'aviso' ms y desaparece a los 'duracion' ms.
+export const CURACION = {
+    probabilidad: 0.2,
+    vida: 1,
+    aviso: 8000,
+    duracion: 10000
 };
 
 // Puerta blindada destructible (objeto "puerta" del mapa). Recibe daño de todos los ataques.

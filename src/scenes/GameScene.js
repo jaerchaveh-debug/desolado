@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import sprites from '../assets/sprites.json';
-import { JUGADOR, ARMAS, ARMAS_INICIALES, ENEMIGOS, JEFES } from '../config/combate';
+import { JUGADOR, ARMAS, ARMAS_INICIALES, ENEMIGOS, JEFES, CURACION } from '../config/combate';
 import { buscarCapitulo, claveNivel, claveMusica } from '../capitulos';
 import { completarCapitulo } from '../sistema/progreso';
 import Enemigo, { EVENTO_ELIMINADO } from '../objetos/Enemigo';
@@ -34,8 +34,6 @@ const ANGULO_CARGA = -135;
 const FRAME_ARMA_CARGANDO = 1;
 // Balanceo (grados) del arma en reposo al caminar
 const BALANCEO_REPOSO = 5;
-// Caer más de esto (px desde el punto más alto del salto o de la caída) es muerte instantánea
-const CAIDA_MORTAL = 176;
 const FRAMES_LUZ = { cian: 1, roja: 2 };
 // px alrededor de la cámara que todavía cuentan como "dentro de la vista" al reubicar enemigos
 const MARGEN_VISTA = 24;
@@ -320,6 +318,12 @@ export default class GameScene extends Phaser.Scene {
         // Los enemigos que quedan muy lejos del jugador reaparecen dentro de su vista
         this.time.addEvent({ delay: this.aparicion.revisarReubicacion, loop: true, callback: () => this.reubicarLejanos() });
         this.events.on(EVENTO_ELIMINADO, tipo => this.contarEliminado(tipo));
+        this.events.on(EVENTO_ELIMINADO, (tipo, enemigo) => this.soltarCelula(enemigo));
+
+        // Células de energía que sueltan los enemigos: caen, se posan en el suelo y curan al recogerlas
+        this.celulas = this.physics.add.group();
+        this.physics.add.collider(this.celulas, this.nivel);
+        this.physics.add.overlap(this.player, this.celulas, (jugador, celula) => this.recogerCelula(celula));
         // Los listeners de this.events sobreviven a scene.restart: hay que quitarlos al cerrar la escena
         this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.events.off(EVENTO_ELIMINADO));
 
@@ -463,6 +467,31 @@ export default class GameScene extends Phaser.Scene {
         return objetivos;
     }
 
+    // Con CURACION.probabilidad, el enemigo eliminado suelta una célula que salta y cae
+    soltarCelula(enemigo) {
+        if (Math.random() >= CURACION.probabilidad) return;
+        const { x, y } = enemigo.body.center;
+        const celula = this.celulas.create(x, y, 'celula-vida').setDepth(9).play('celula-vida-brillar');
+        celula.body.setSize(6, 7).setBounce(0.3).setDrag(240, 0);
+        celula.setVelocity(Phaser.Math.Between(-50, 50), -160);
+        // Aviso parpadeando y desaparición (con el reloj de la escena: se detienen en la pausa)
+        this.time.delayedCall(CURACION.aviso, () => {
+            if (celula.active) this.tweens.add({ targets: celula, alpha: 0.2, duration: 120, yoyo: true, repeat: -1 });
+        });
+        this.time.delayedCall(CURACION.duracion, () => celula.active && celula.destroy());
+    }
+
+    // Solo se recoge si falta vida: con la vida al máximo se queda donde está
+    recogerCelula(celula) {
+        if (!celula.active || this.muerto || this.vida >= JUGADOR.vida) return;
+        this.vida = Math.min(JUGADOR.vida, this.vida + CURACION.vida);
+        this.actualizarHud();
+        const celda = this.celdasVida[this.vida - 1];
+        this.tweens.add({ targets: celda, alpha: 0.3, duration: 70, yoyo: true, repeat: 2 });
+        this.tweens.killTweensOf(celula);
+        celula.destroy();
+    }
+
     crearHud() {
         // Una celda por punto de vida máximo, fija a la cámara
         this.celdasVida = Array.from({ length: JUGADOR.vida }, (_, i) =>
@@ -560,8 +589,10 @@ export default class GameScene extends Phaser.Scene {
         this.celdasVida.forEach((celda, i) => celda.setFrame(i < this.vida ? FRAME_VIDA_LLENA : FRAME_VIDA_VACIA));
     }
 
-    danarJugador(cantidad, origenX) {
-        if (this.muerto || this.victoria || this.dash || this.time.now < this.invulnerableHasta) return;
+    // caida: daño por caída alta; ignora la invulnerabilidad y no tiene retroceso
+    danarJugador(cantidad, origenX, caida = false) {
+        if (this.muerto || this.victoria) return;
+        if (!caida && (this.dash || this.time.now < this.invulnerableHasta)) return;
 
         this.vida = Math.max(0, this.vida - cantidad);
         this.actualizarHud();
@@ -573,9 +604,11 @@ export default class GameScene extends Phaser.Scene {
         }
 
         // Empujón alejándose del atacante
-        const dir = this.player.x < origenX ? -1 : 1;
-        this.player.setVelocity(JUGADOR.retroceso.x * dir, JUGADOR.retroceso.y);
-        this.controlBloqueadoHasta = this.time.now + 200;
+        if (!caida) {
+            const dir = this.player.x < origenX ? -1 : 1;
+            this.player.setVelocity(JUGADOR.retroceso.x * dir, JUGADOR.retroceso.y);
+            this.controlBloqueadoHasta = this.time.now + 200;
+        }
 
         // Invulnerabilidad: el sprite parpadea mientras dura
         this.invulnerableHasta = this.time.now + JUGADOR.invulnerabilidad;
@@ -884,16 +917,16 @@ export default class GameScene extends Phaser.Scene {
             return;
         }
 
-        // Caída mortal: se mide desde el punto más alto alcanzado en el aire. Se comprueba también al
-        // aterrizar, porque con pocos FPS el último frame puede pasar del aire al suelo de golpe
-        // En la sala del jefe no hay caída mortal (sus plataformas están muy por encima del suelo)
+        // Caída alta: se mide desde el punto más alto alcanzado en el aire y, al aterrizar, si supera
+        // JUGADOR.caida.altura quita JUGADOR.caida.danio. En la sala del jefe no cuenta (sus plataformas
+        // están muy por encima del suelo).
         const enAire = !this.player.body.blocked.down;
         if (enAire) this.alturaAire = Math.min(this.alturaAire ?? this.player.y, this.player.y);
         const caida = this.alturaAire === null ? 0 : this.player.y - this.alturaAire;
         if (!enAire) this.alturaAire = null;
-        if (caida > CAIDA_MORTAL && !this.enSalaJefe) {
-            this.morirJugador();
-            return;
+        if (!enAire && caida > JUGADOR.caida.altura && !this.enSalaJefe) {
+            this.danarJugador(JUGADOR.caida.danio, this.player.x, true);
+            if (this.muerto) return;
         }
 
         const { left, right, up, down, space } = this.cursors;

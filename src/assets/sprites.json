@@ -452,5 +452,23 @@
     "tipo": "sprite",
     "animaciones": {},
     "propiedades": {}
+  },
+  "celula-vida": {
+    "archivo": "assets/sprites/celula-vida.png",
+    "ancho": 8,
+    "alto": 8,
+    "frames": 2,
+    "tipo": "sprite",
+    "animaciones": {
+      "brillar": {
+        "frames": [
+          0,
+          1
+        ],
+        "fps": 4,
+        "repetir": -1
+      }
+    },
+    "propiedades": {}
   }
 }
