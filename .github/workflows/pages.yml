@@ -25,7 +25,9 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - run: npm ci
+      # npm install y no npm ci: el lockfile se genera en Windows y npm ci en Linux es estricto con
+      # las dependencias opcionales por plataforma de los binarios de Vite (rolldown)
+      - run: npm install --no-audit --no-fund
       - run: npm run build
       - uses: actions/upload-pages-artifact@v4
         with:
