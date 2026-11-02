@@ -1,0 +1,5 @@
+# Finales de línea LF en el repositorio para todo el texto; binarios sin tocar
+* text=auto eol=lf
+*.png binary
+*.ogg binary
+*.mp3 binary

@@ -1,0 +1,456 @@
+{
+  "jugador": {
+    "archivo": "assets/sprites/jugador.png",
+    "ancho": 16,
+    "alto": 32,
+    "frames": 84,
+    "tipo": "sprite",
+    "animaciones": {
+      "quieto": {
+        "frames": [
+          0,
+          1
+        ],
+        "fps": 2,
+        "repetir": -1
+      },
+      "correr": {
+        "frames": [
+          2,
+          3,
+          4,
+          5
+        ],
+        "fps": 10,
+        "repetir": -1
+      },
+      "saltar": {
+        "frames": [
+          6
+        ],
+        "fps": 1,
+        "repetir": 0
+      }
+    },
+    "propiedades": {}
+  },
+  "tiles-pasillo": {
+    "archivo": "assets/sprites/tiles-pasillo.png",
+    "ancho": 16,
+    "alto": 16,
+    "frames": 28,
+    "tipo": "tileset",
+    "animaciones": {},
+    "propiedades": {
+      "0": {
+        "solido": true
+      },
+      "1": {
+        "solido": true
+      },
+      "2": {
+        "solido": true
+      },
+      "3": {
+        "solido": true
+      },
+      "4": {
+        "soloArriba": true
+      },
+      "6": {
+        "solido": true
+      },
+      "11": {
+        "luz": "cian"
+      },
+      "12": {
+        "luz": "roja"
+      },
+      "13": {
+        "solido": true
+      },
+      "14": {
+        "solido": true
+      },
+      "15": {
+        "solido": true
+      },
+      "16": {
+        "solido": true
+      },
+      "17": {
+        "soloArriba": true
+      },
+      "18": {
+        "soloArriba": true
+      }
+    }
+  },
+  "proyectil": {
+    "archivo": "assets/sprites/proyectil.png",
+    "ancho": 8,
+    "alto": 8,
+    "frames": 3,
+    "tipo": "sprite",
+    "animaciones": {},
+    "propiedades": {}
+  },
+  "robot-tentaculos": {
+    "archivo": "assets/sprites/robot-tentaculos.png",
+    "ancho": 24,
+    "alto": 24,
+    "frames": 7,
+    "tipo": "sprite",
+    "animaciones": {
+      "flotar": {
+        "frames": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "fps": 6,
+        "repetir": -1
+      },
+      "morir": {
+        "frames": [
+          4,
+          5,
+          6
+        ],
+        "fps": 12,
+        "repetir": 0
+      }
+    },
+    "propiedades": {}
+  },
+  "hud-vida": {
+    "archivo": "assets/sprites/hud-vida.png",
+    "ancho": 8,
+    "alto": 8,
+    "frames": 2,
+    "tipo": "sprite",
+    "animaciones": {},
+    "propiedades": {}
+  },
+  "fuente": {
+    "archivo": "assets/sprites/fuente.png",
+    "ancho": 6,
+    "alto": 8,
+    "frames": 46,
+    "tipo": "fuente",
+    "animaciones": {},
+    "propiedades": {},
+    "caracteres": "0123456789 ABCDEFGHIJKLMNÑOPQRSTUVWXYZ.,:!?-/>"
+  },
+  "robot-cuchillas": {
+    "archivo": "assets/sprites/robot-cuchillas.png",
+    "ancho": 32,
+    "alto": 24,
+    "frames": 10,
+    "tipo": "sprite",
+    "animaciones": {
+      "caminar": {
+        "frames": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "fps": 8,
+        "repetir": -1
+      },
+      "morir": {
+        "frames": [
+          4,
+          5,
+          6
+        ],
+        "fps": 12,
+        "repetir": 0
+      },
+      "atacar": {
+        "frames": [
+          7,
+          7,
+          8,
+          8,
+          9
+        ],
+        "fps": 8,
+        "repetir": 0
+      }
+    },
+    "propiedades": {}
+  },
+  "escopeta": {
+    "archivo": "assets/sprites/escopeta.png",
+    "ancho": 96,
+    "alto": 32,
+    "frames": 3,
+    "tipo": "sprite",
+    "animaciones": {
+      "disparo": {
+        "frames": [
+          0,
+          1,
+          2
+        ],
+        "fps": 24,
+        "repetir": 0
+      }
+    },
+    "propiedades": {}
+  },
+  "hud-escopeta": {
+    "archivo": "assets/sprites/hud-escopeta.png",
+    "ancho": 16,
+    "alto": 16,
+    "frames": 2,
+    "tipo": "sprite",
+    "animaciones": {},
+    "propiedades": {}
+  },
+  "carga-espada": {
+    "archivo": "assets/sprites/carga-espada.png",
+    "ancho": 32,
+    "alto": 32,
+    "frames": 4,
+    "tipo": "sprite",
+    "animaciones": {
+      "cargar": {
+        "frames": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "fps": 10,
+        "repetir": -1
+      }
+    },
+    "propiedades": {}
+  },
+  "espada": {
+    "archivo": "assets/sprites/espada.png",
+    "ancho": 20,
+    "alto": 7,
+    "frames": 2,
+    "tipo": "sprite",
+    "animaciones": {},
+    "propiedades": {}
+  },
+  "hud-espada": {
+    "archivo": "assets/sprites/hud-espada.png",
+    "ancho": 16,
+    "alto": 16,
+    "frames": 2,
+    "tipo": "sprite",
+    "animaciones": {},
+    "propiedades": {}
+  },
+  "onda-espada": {
+    "archivo": "assets/sprites/onda-espada.png",
+    "ancho": 16,
+    "alto": 32,
+    "frames": 2,
+    "tipo": "sprite",
+    "animaciones": {
+      "viajar": {
+        "frames": [
+          0,
+          1
+        ],
+        "fps": 16,
+        "repetir": -1
+      }
+    },
+    "propiedades": {}
+  },
+  "tajo-espada": {
+    "archivo": "assets/sprites/tajo-espada.png",
+    "ancho": 80,
+    "alto": 32,
+    "frames": 3,
+    "tipo": "sprite",
+    "animaciones": {
+      "disparo": {
+        "frames": [
+          0,
+          1,
+          2
+        ],
+        "fps": 24,
+        "repetir": 0
+      }
+    },
+    "propiedades": {}
+  },
+  "luz-fondo": {
+    "archivo": "assets/sprites/luz-fondo.png",
+    "ancho": 8,
+    "alto": 8,
+    "frames": 3,
+    "tipo": "sprite",
+    "animaciones": {},
+    "propiedades": {}
+  },
+  "mira": {
+    "archivo": "assets/sprites/mira.png",
+    "ancho": 9,
+    "alto": 9,
+    "frames": 1,
+    "tipo": "sprite",
+    "animaciones": {},
+    "propiedades": {}
+  },
+  "puerta-metal": {
+    "archivo": "assets/sprites/puerta-metal.png",
+    "ancho": 16,
+    "alto": 64,
+    "frames": 5,
+    "tipo": "sprite",
+    "animaciones": {},
+    "propiedades": {}
+  },
+  "chatarra": {
+    "archivo": "assets/sprites/chatarra.png",
+    "ancho": 6,
+    "alto": 6,
+    "frames": 3,
+    "tipo": "sprite",
+    "animaciones": {},
+    "propiedades": {}
+  },
+  "jefe-estibador": {
+    "archivo": "assets/sprites/jefe-estibador.png",
+    "ancho": 48,
+    "alto": 64,
+    "frames": 16,
+    "tipo": "sprite",
+    "animaciones": {
+      "caminar": {
+        "frames": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "fps": 5,
+        "repetir": -1
+      },
+      "zarpazo": {
+        "frames": [
+          4,
+          5,
+          4,
+          5,
+          6,
+          6,
+          7
+        ],
+        "fps": 9,
+        "repetir": 0
+      },
+      "cargar": {
+        "frames": [
+          8
+        ],
+        "fps": 1,
+        "repetir": 0
+      },
+      "descarga": {
+        "frames": [
+          9
+        ],
+        "fps": 1,
+        "repetir": 0
+      },
+      "disparar": {
+        "frames": [
+          10
+        ],
+        "fps": 1,
+        "repetir": 0
+      },
+      "rayo": {
+        "frames": [
+          11
+        ],
+        "fps": 1,
+        "repetir": 0
+      },
+      "saltar": {
+        "frames": [
+          12
+        ],
+        "fps": 1,
+        "repetir": 0
+      },
+      "morir": {
+        "frames": [
+          13,
+          14,
+          15
+        ],
+        "fps": 4,
+        "repetir": 0
+      }
+    },
+    "propiedades": {}
+  },
+  "bola-energia": {
+    "archivo": "assets/sprites/bola-energia.png",
+    "ancho": 8,
+    "alto": 8,
+    "frames": 2,
+    "tipo": "sprite",
+    "animaciones": {
+      "viajar": {
+        "frames": [
+          0,
+          1
+        ],
+        "fps": 10,
+        "repetir": -1
+      }
+    },
+    "propiedades": {}
+  },
+  "rayo-jefe": {
+    "archivo": "assets/sprites/rayo-jefe.png",
+    "ancho": 16,
+    "alto": 8,
+    "frames": 3,
+    "tipo": "sprite",
+    "animaciones": {},
+    "propiedades": {}
+  },
+  "onda-jefe": {
+    "archivo": "assets/sprites/onda-jefe.png",
+    "ancho": 192,
+    "alto": 192,
+    "frames": 3,
+    "tipo": "sprite",
+    "animaciones": {
+      "descargar": {
+        "frames": [
+          1,
+          2
+        ],
+        "fps": 8,
+        "repetir": 0
+      }
+    },
+    "propiedades": {}
+  },
+  "barra-jefe": {
+    "archivo": "assets/sprites/barra-jefe.png",
+    "ancho": 160,
+    "alto": 6,
+    "frames": 2,
+    "tipo": "sprite",
+    "animaciones": {},
+    "propiedades": {}
+  }
+}
