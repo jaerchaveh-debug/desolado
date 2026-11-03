@@ -38,7 +38,7 @@
     "archivo": "assets/sprites/tiles-pasillo.png",
     "ancho": 16,
     "alto": 16,
-    "frames": 28,
+    "frames": 29,
     "tipo": "tileset",
     "animaciones": {},
     "propiedades": {

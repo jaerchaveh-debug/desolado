@@ -272,9 +272,31 @@ const POSES = [
     retroceso(capa(BRAZO_DIAGONAL_ABAJO, 'brazo-diagonal-abajo'), -1, -1)
 ];
 
+// Cola de la bufanda por fuera del abrigo (píxeles [x, y, color]); se mueve con la animación:
+// cuelga en reposo, ondea hacia atrás al correr y sube al saltar.
+const COLA_BUFANDA = {
+    quieto: [[2, 14, 'c'], [2, 15, 'b'], [2, 16, 'b']],
+    correrA: [[2, 11, 'c'], [1, 11, 'b']],
+    correrB: [[2, 11, 'c'], [1, 12, 'b']],
+    correrC: [[2, 11, 'c'], [1, 10, 'b']],
+    correrD: [[2, 12, 'c'], [1, 12, 'b']],
+    saltar: [[3, 10, 'c'], [2, 9, 'c'], [1, 8, 'b']]
+};
+
+// Detalle del torso, por debajo del brazo: cinturón, bolsa y cola de la bufanda
+function detalles(torso, piernas) {
+    torso.patron(4, 18, 8, 1, (x, y) => (torso.color(x + 4, 18) !== '0' ? '1' : null));   // cinturón
+    torso.punto(8, 18, '5');                                                                // hebilla
+    torso.punto(10, 19, 'b').punto(10, 20, 'a');                                            // bolsa del cinturón
+    const cola = new Lienzo(ANCHO, TORSO.length);
+    COLA_BUFANDA[piernas].forEach(([x, y, c]) => cola.punto(x, y, c));
+    return cola.contorno('0').pegar(torso, 0, 0);
+}
+
 // rebote: desplaza el torso 1 px hacia abajo (contacto con el suelo / respiración)
 function frame(piernas, rebote, brazo) {
-    const torso = Lienzo.desdeTexto(TORSO, ANCHO, TORSO.length, 'jugador.torso').pegar(brazo, 0, 0);
+    const base = Lienzo.desdeTexto(TORSO, ANCHO, TORSO.length, 'jugador.torso');
+    const torso = detalles(base, piernas).pegar(brazo, 0, 0);
     const abajo = Lienzo.desdeTexto(PIERNAS[piernas], ANCHO, PIERNAS[piernas].length, `jugador.${piernas}`);
     return new Lienzo(ANCHO, ALTO)
         .pegar(abajo, 0, TORSO.length)

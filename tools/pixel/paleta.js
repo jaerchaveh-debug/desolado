@@ -38,6 +38,24 @@ export const PALETA = {
 
 export const TRANSPARENTE = '.';
 
+// Rampas de sombreado, de oscuro a claro. oscurecer/aclarar y degradados
+// recorren una rampa sin salirse de ella (en los extremos se quedan igual).
+export const RAMPAS = [
+    '0123456789',   // grises azulados
+    'abcd',         // óxido
+    'efgh',         // cian
+    'ij',           // rojo
+    'lk'            // piel
+];
+
+// Color a `pasos` de distancia dentro de su rampa (negativo = más oscuro)
+export function tonoVecino(c, pasos) {
+    const rampa = RAMPAS.find(r => r.includes(c));
+    if (!rampa) return c;
+    const i = Math.max(0, Math.min(rampa.length - 1, rampa.indexOf(c) + pasos));
+    return rampa[i];
+}
+
 export function hexARgb(hex) {
     const n = parseInt(hex.slice(1), 16);
     return [(n >> 16) & 255, (n >> 8) & 255, n & 255];

@@ -76,13 +76,23 @@ function cuerpo(l, fase) {
     l.lineaH(8, 12 + b, 7, '6');
     [9, 11, 13].forEach(x => l.punto(x, 11 + b, '6'));      // vértebras
     l.punto(17, 10 + b, '7').punto(19, 10 + b, '7');        // placas del pecho
+    l.lineaV(15, 9 + b, 4, '6');                            // junta entre pecho y cintura
+    l.lineaV(18, 9 + b, 3, '7');                            // junta entre las placas del pecho
+    l.patron(8, 10 + b, 14, 3, (x, y) => ruido(x, y, 61) > 0.94 ? '6' : null);   // arañazos
+    l.punto(15, 12 + b, 'b').punto(15, 13 + b, 'a');        // óxido bajo la junta
+    // Tubo hidráulico sobre la espalda, del cuello a la cadera; luz de estado roja en la espalda
+    l.cable(9, 7 + b, 21, 5 + b, '0', -1).cable(9, 8 + b, 21, 6 + b, '4', -1);   // contorno encima
+    l.punto(13, 7 + b, '0').lineaH(11, 8 + b, 3, '0').punto(22, 5 + b, '0').punto(22, 6 + b, '4');   // cierra huecos y lo une al cuello
+    l.punto(12, 10 + b, fase === 1 || fase === 3 ? 'j' : 'i');
     // Cuello y cabeza redondeada sin rostro, con ranura de ojo roja
     l.rect(22, 7 + b, 2, 3, '0').punto(22, 8 + b, '6');
     l.rect(23, 2 + b, 7, 7, '0');
     l.rect(24, 3 + b, 5, 5, '8');
     l.lineaH(24, 3 + b, 5, '9').lineaH(24, 7 + b, 5, '6');
     l.punto(23, 2 + b, '.').punto(29, 2 + b, '.').punto(23, 8 + b, '.').punto(29, 8 + b, '.');
-    l.lineaH(26, 5 + b, 3, 'j').punto(28, 5 + b, 'i');
+    l.lineaV(25, 4 + b, 3, '7');                            // junta de la placa lateral de la cabeza
+    // Ranura del ojo: un punto brillante la recorre al caminar (barrido)
+    l.lineaH(26, 5 + b, 3, 'i').punto(26 + [2, 1, 0, 1][fase % 4], 5 + b, 'j');
     return l;
 }
 

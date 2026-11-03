@@ -1,4 +1,4 @@
-// Jefe del capítulo 1: el Estibador. Humanoide negro de doble tamaño que el jugador, con garras
+// Jefe del capítulo 1: el Estibador. Humanoide negro de cuatro piernas, doble tamaño que el jugador, con garras
 // metálicas de carga (para mover cajas) y ojos metálicos. Mira a la derecha. Frames de 48x64.
 // Cuerpo casi negro con luz de borde ('3'/'4') para que se lea sobre el fondo oscuro del almacén.
 //   0-3  caminar
@@ -84,8 +84,11 @@ function ponerGarra(l, g, x, y, orientacion) {
     return l.pegar(g, x, y - 5);   // frente
 }
 
-// Torso y cabeza (oy: desplazamiento vertical, ojos: 'metal' | 'rojo' | 'apagado')
-function cuerpo(l, oy, ojos) {
+// Torso y cabeza (oy: desplazamiento vertical, ojos: 'metal' | 'rojo' | 'apagado', i: índice del frame)
+function cuerpo(l, oy, ojos, i) {
+    // cable suelto que cuelga de la cadera trasera y se balancea al caminar (detrás del torso)
+    const vaiven = [-1, 0, 1, 0][i % 4];
+    l.cable(CX - 8, 38 + oy, CX - 9 + vaiven, 44 + oy, '3', 2).punto(CX - 9 + vaiven, 45 + oy, 'b');
     // torso: hombros anchos que se estrechan hacia la cintura
     for (let y = 18; y <= 42; y++) {
         const m = y < 23 ? 13 : y < 37 ? Math.round(13 - (y - 23) * 5 / 14) : 9;
@@ -95,15 +98,26 @@ function cuerpo(l, oy, ojos) {
         l.punto(x1 - 1, y + oy, '3');                                       // borde delantero iluminado
     }
     l.lineaH(CX - 13, 17 + oy, 26, '0').lineaH(CX - 12, 18 + oy, 24, '4').lineaH(CX - 12, 19 + oy, 24, '3');
+    // volumen: la parte alta del pecho recibe la luz de arriba, con la costura tramada
+    l.degradado(CX - 11, 20 + oy, 22, 8, '21', { costura: 0.4, zona: (x, y) => l.color(x, y) === '1' });
     // placas del pecho, columna y cintura
     l.lineaH(CX - 10, 26 + oy, 20, '0').lineaH(CX - 10, 27 + oy, 20, '2');
     l.lineaH(CX - 8, 32 + oy, 16, '0').lineaH(CX - 8, 33 + oy, 16, '2');
     l.lineaV(CX, 20 + oy, 16, '2');
     l.rect(CX - 9, 37 + oy, 18, 2, '2').lineaH(CX - 9, 37 + oy, 18, '3');
     l.patron(CX - 11, 20 + oy, 22, 16, (x, y) => (ruido(x, y, 61) > 0.95 ? '2' : null));
+    l.patron(CX - 11, 20 + oy, 22, 16, (x, y) => (ruido(x, y, 62) > 0.985 ? '3' : null));      // arañazos
+    [-8, -4, 4, 8].forEach(dx => l.punto(CX + dx, 27 + oy, '4').punto(CX + dx, 33 + oy, '3'));   // remaches de las placas
+    // núcleo de energía bajo la placa del pecho: late en rojo (apagado al morir)
+    const latido = ojos === 'apagado' ? ['2', '1'] : i % 2 ? ['j', 'i'] : ['i', 'i'];
+    l.rect(CX + 2, 29 + oy, 5, 3, '0').lineaH(CX + 3, 30 + oy, 3, latido[1]).punto(CX + 4, 30 + oy, latido[0]);
+    // tubos del cuello a los hombros
+    l.cable(CX - 3, 16 + oy, CX - 10, 18 + oy, '3', 1).cable(CX + 2, 16 + oy, CX + 9, 18 + oy, '3', 1);
     // pistones de los hombros
     l.rect(CX - 14, 19 + oy, 4, 6, '2').marco(CX - 14, 19 + oy, 4, 6, '0').punto(CX - 13, 20 + oy, '5');
     l.rect(CX + 10, 19 + oy, 4, 6, '2').marco(CX + 10, 19 + oy, 4, 6, '0').punto(CX + 12, 20 + oy, '5');
+    l.lineaV(CX - 12, 21 + oy, 3, '4').lineaV(CX + 11, 21 + oy, 3, '4');                      // vástagos de los pistones
+    l.punto(CX - 13, 25 + oy, 'b').punto(CX - 13, 26 + oy, 'a');                              // óxido que chorrea
     // cuello y cabeza
     l.rect(CX - 3, 14 + oy, 6, 4, '1').lineaV(CX - 3, 14 + oy, 4, '0').lineaV(CX + 2, 14 + oy, 4, '0');
     l.rect(CX - 6, 3 + oy, 12, 12, '1').marco(CX - 6, 3 + oy, 12, 12, '0');
@@ -118,19 +132,26 @@ function cuerpo(l, oy, ojos) {
     if (ojos === 'rojo') l.punto(CX + 6, 9 + oy, 'j').punto(CX + 7, 9 + oy, 'i');   // destello del rayo
     // rejilla de la mandíbula
     for (let x = CX - 1; x < CX + 5; x += 2) l.lineaV(x, 12 + oy, 2, '2');
+    for (let y = 7; y < 13; y += 2) l.lineaH(CX - 4, y + oy, 3, '2');                         // rejilla lateral del casco
     return l;
 }
 
 // Pose completa: piernas, brazos y garras alrededor del cuerpo
-function pose({ oy = 0, piernas, brazoAtras, brazoFrente, garraAtras, garraFrente, ojos = 'metal' }) {
+function pose({ oy = 0, piernas, brazoAtras, brazoFrente, garraAtras, garraFrente, ojos = 'metal' }, i) {
     const l = new Lienzo(ANCHO, ALTO);
-    const [pa, pf] = piernas;
+    const [pa, pf, ta, tf] = piernas;
+    // par trasero: más fino que el delantero y abierto hacia fuera (asoma bajo las garras), detrás de todo
+    for (const t of [ta, tf]) {
+        miembro(l, t, 3);
+        const [x, y] = t.at(-1);
+        l.rect(x - 3, y + 1, 6, 3, '0').rect(x - 2, y + 1, 4, 2, '2');
+    }
     miembro(l, brazoAtras.puntos.map(([x, y]) => [x, y + oy]), 3);
     ponerGarra(l, garra(brazoAtras.garra, garraAtras), ...brazoAtras.puntos.at(-1).map((v, i) => v + (i ? oy : 0)), brazoAtras.garra);
     miembro(l, pa, 4);
     const [xa, ya] = pa.at(-1), [xf, yf] = pf.at(-1);
     l.rect(xa - 3, ya + 1, 7, 3, '0').rect(xa - 2, ya + 1, 5, 2, '2');   // pie trasero
-    cuerpo(l, oy, ojos);
+    cuerpo(l, oy, ojos, i);
     miembro(l, pf, 4);
     l.rect(xf - 3, yf + 1, 8, 3, '0').rect(xf - 2, yf + 1, 6, 2, '3').lineaH(xf - 2, yf + 1, 6, '4');
     miembro(l, brazoFrente.puntos.map(([x, y]) => [x, y + oy]), 3);
@@ -138,10 +159,14 @@ function pose({ oy = 0, piernas, brazoAtras, brazoFrente, garraAtras, garraFrent
     return l;
 }
 
-// Piernas: cadera → rodilla → pie (el pie apoya en la fila 61)
-const piernas = (paso, oy = 0) => [
+// Cuatro piernas: cadera → rodilla → pie (el pie apoya en la fila 61). Las dos primeras son el par
+// delantero; las dos últimas, el trasero: más abierto, con las rodillas altas y hacia fuera, y por
+// defecto a contratiempo (pasoTrasero = -paso) para que al caminar se alternen.
+const piernas = (paso, oy = 0, pasoTrasero = -paso) => [
     [[CX - 4, 41 + oy], [CX - 6 - paso, 51 + Math.round(oy / 2)], [CX - 6 - paso * 2, 60]],
-    [[CX + 4, 41 + oy], [CX + 6 + paso, 51 + Math.round(oy / 2)], [CX + 5 + paso * 2, 60]]
+    [[CX + 4, 41 + oy], [CX + 6 + paso, 51 + Math.round(oy / 2)], [CX + 5 + paso * 2, 60]],
+    [[CX - 7, 39 + oy], [CX - 18 - pasoTrasero, 50 + Math.round(oy / 2)], [CX - 20 - Math.round(pasoTrasero / 2), 60]],
+    [[CX + 6, 39 + oy], [CX + 17 + pasoTrasero, 50 + Math.round(oy / 2)], [CX + 19 + Math.round(pasoTrasero / 2), 60]]
 ];
 const colgando = (vaiven = 0) => ({
     brazoAtras: { puntos: [[CX - 12, 21], [CX - 16 - vaiven, 31], [CX - 15 - vaiven, 41]], garra: 'abajo' },
@@ -179,13 +204,13 @@ const POSES = [
     },
     // cargar (agachado, garras abiertas al rojo) · descarga
     {
-        oy: 3, piernas: piernas(4, 3),
+        oy: 3, piernas: piernas(4, 3, 3),
         brazoAtras: { puntos: [[CX - 12, 21], [CX - 18, 30], [CX - 19, 38]], garra: 'abajo' },
         brazoFrente: { puntos: [[CX + 11, 21], [CX + 17, 30], [CX + 18, 38]], garra: 'abajo' },
         garraAtras: { abierta: true, brillo: true }, garraFrente: { abierta: true, brillo: true }
     },
     {
-        oy: -1, piernas: piernas(5),
+        oy: -1, piernas: piernas(5, 0, 3),
         brazoAtras: { puntos: [[CX - 12, 21], [CX - 18, 16], [CX - 19, 10]], garra: 'arriba' },
         brazoFrente: { puntos: [[CX + 11, 21], [CX + 17, 16], [CX + 18, 10]], garra: 'arriba' },
         garraAtras: { abierta: true, brillo: true }, garraFrente: { abierta: true, brillo: true }
@@ -202,19 +227,22 @@ const POSES = [
     // saltar: piernas recogidas, brazos abiertos
     {
         oy: -2,
-        piernas: [[[CX - 4, 39], [CX - 10, 45], [CX - 6, 52]], [[CX + 4, 39], [CX + 10, 44], [CX + 7, 51]]],
+        piernas: [
+            [[CX - 4, 39], [CX - 10, 45], [CX - 6, 52]], [[CX + 4, 39], [CX + 10, 44], [CX + 7, 51]],
+            [[CX - 7, 37], [CX - 16, 41], [CX - 14, 49]], [[CX + 6, 37], [CX + 15, 41], [CX + 13, 49]]
+        ],
         brazoAtras: { puntos: [[CX - 12, 19], [CX - 18, 24], [CX - 20, 31]], garra: 'abajo' },
         brazoFrente: { puntos: [[CX + 11, 19], [CX + 17, 24], [CX + 19, 31]], garra: 'abajo' }
     },
     // morir: rodillas, se encorva, se desploma (ojos apagados)
-    { oy: 4, piernas: piernas(5, 4), ...colgando(1), ojos: 'apagado' },
+    { oy: 4, piernas: piernas(5, 4, 2), ...colgando(1), ojos: 'apagado' },
     {
-        oy: 9, piernas: piernas(7, 9), ojos: 'apagado',
+        oy: 9, piernas: piernas(7, 9, 4), ojos: 'apagado',
         brazoAtras: { puntos: [[CX - 12, 21], [CX - 16, 30], [CX - 17, 38]], garra: 'abajo' },
         brazoFrente: { puntos: [[CX + 11, 21], [CX + 16, 30], [CX + 17, 38]], garra: 'abajo' }
     },
     {
-        oy: 14, piernas: piernas(9, 14), ojos: 'apagado',
+        oy: 14, piernas: piernas(9, 14, 5), ojos: 'apagado',
         brazoAtras: { puntos: [[CX - 12, 21], [CX - 20, 28], [CX - 22, 34]], garra: 'abajo' },
         brazoFrente: { puntos: [[CX + 11, 21], [CX + 19, 28], [CX + 21, 34]], garra: 'abajo' }
     }

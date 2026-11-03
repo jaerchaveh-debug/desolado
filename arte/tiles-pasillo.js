@@ -12,6 +12,8 @@
 // Fondo del almacén (capa "fondo"):
 //   20-23 caja de fondo 2x2 (20 sup. izq. · 21 sup. der. · 22 inf. izq. · 23 inf. der.)
 //   24 balda de estantería · 25 poste de estantería · 26 hueco oscuro de estantería · 27 caja pequeña de fondo
+// Variantes:
+//   28 cables colgando sin conector (decoración; alternar con el 7)
 
 import { Lienzo, ruido } from '../tools/pixel/lienzo.js';
 
@@ -84,16 +86,22 @@ function panelOxido() {
     });
 }
 
-function cables() {
+// Cables combados colgando del techo. Cuelgan sobre el negro o el concreto del fondo,
+// así que van en tonos '2'-'4' (canto superior iluminado, inferior en sombra), por
+// debajo del '5'/'6' de los bordes pisables para no confundirse con una plataforma.
+// Con conector = false (tile 28) solo quedan los lazos: alternar 7 y 28 en el mapa
+// para que la luz del conector no se repita en toda la fila.
+function cables(conector = true) {
     const l = new Lienzo(T, T);
-    // cada cable: columna base y curva suave hacia abajo
-    [[3, '0'], [6, '1'], [11, '0']].forEach(([x0, c], k) => {
-        for (let y = 0; y < T; y++) {
-            const x = x0 + Math.round(Math.sin((y + k * 5) / 5) * 1.2);
-            l.punto(x, y, c);
-        }
-    });
-    l.punto(6, 9, 'f');                                        // conector con luz
+    const combado = (x0, x1, caida, luz, sombra) =>
+        l.cable(x0, 1, x1, 1, sombra, caida).cable(x0, 0, x1, 0, luz, caida);
+    combado(4, 9, 3, '3', '2');                                // lazo corto, detrás
+    combado(0, 11, 6, '4', '2');                               // lazo largo, delante
+    l.punto(1, 0, '2').punto(12, 0, '2');                      // abrazaderas
+    if (!conector) return l;
+    l.lineaV(13, 0, 10, '4').lineaV(14, 0, 10, '3');           // cable suelto
+    l.rect(12, 10, 4, 2, '4').lineaH(12, 10, 4, '5').lineaH(12, 12, 4, '2');   // conector
+    l.punto(13, 11, 'f');                                      // luz del conector
     return l;
 }
 
@@ -250,7 +258,8 @@ export default {
         ...[[0, 0], [1, 0], [0, 1], [1, 1]].map(([c, f]) => trozo(cajaGrande(), c, f)),
         plataformaColgante(true), plataformaColgante(false), cableSuspension(),
         ...[[0, 0], [1, 0], [0, 1], [1, 1]].map(([c, f]) => trozo(cajaFondo(), c, f)),
-        balda(), poste(), huecoEstanteria(), cajaPequenaFondo()
+        balda(), poste(), huecoEstanteria(), cajaPequenaFondo(),
+        cables(false)
     ],
     // Propiedades por índice de tile. GameScene las aplica al cargar cualquier nivel:
     //   solido: colisiona por todos los lados; soloArriba: plataforma atravesable desde abajo

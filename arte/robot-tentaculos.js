@@ -7,7 +7,7 @@ import { Lienzo, ruido } from '../tools/pixel/lienzo.js';
 const T = 24;
 const CX = 12, CY = 8, RADIO = 7;   // centro y radio del casco
 
-function casco(l) {
+function casco(l, i = 0) {
     l.patron(CX - RADIO, CY - RADIO, RADIO * 2 + 1, RADIO * 2 + 1, (x, y) => {
         const dx = x - RADIO, dy = y - RADIO;
         const d = Math.sqrt(dx * dx + dy * dy);
@@ -17,10 +17,16 @@ function casco(l) {
         const luz = -dy - dx * 0.3;                          // luz desde arriba a la izquierda
         return luz > 4 ? '7' : luz > 1.5 ? '6' : luz > -1.5 ? '5' : luz > -4 ? '4' : '3';
     });
-    // Ojo rojo mirando al frente (derecha)
+    const dentro = (x, y) => Math.hypot(x - CX, y - CY) < RADIO - 0.7;
+    l.oscurecer((x, y) => x === 10 && y >= 3 && y <= 9 && dentro(x, y));   // junta vertical de placas
+    [13, 16].forEach(x => l.punto(x, 10, '4'));      // remaches de la junta horizontal
+    l.oscurecer((x, y) => y >= 11 && y <= 12 && x >= 8 && x <= 12 && x % 2 === 0, 2);   // rejilla de ventilación
+    l.punto(15, 11, 'b').punto(15, 12, 'a').punto(16, 11, 'a');   // chorreón de óxido bajo la junta
+    // Ojo rojo mirando al frente (derecha); late en los frames 1 y 2 (se enciende la cuenca entera)
     l.rect(14, 6, 4, 3, '0');
     l.rect(15, 7, 2, 1, 'j');
     l.punto(14, 7, 'i');
+    if (i === 1 || i === 2) l.lineaH(14, 7, 3, 'j');
     l.punto(9, 3, '8').punto(8, 4, '8');                    // brillo especular
     return l;
 }
@@ -35,7 +41,8 @@ function tentaculos(l, fase) {
             const amp = 0.4 + t * 0.22;
             const x = x0 + Math.round(Math.sin(t / 2.2 + fase + k * 1.7) * amp) + (k < 2 ? -Math.floor(t / 4) : Math.floor(t / 4));
             // Negro metálico ('1') en vez de '0' puro, para que se distingan sobre el fondo negro
-            l.punto(x, y, t % 2 === 0 ? '2' : '1');          // segmentos alternos
+            // segmentos alternos, articulación clara cada 4 px y punta metálica
+            l.punto(x, y, y === T - 1 ? '4' : t % 4 === 3 ? '3' : t % 2 === 0 ? '2' : '1');
             if (t < 5) l.punto(x - 1, y, '3');               // más gruesos y con borde de luz cerca de la base
             // rellena saltos horizontales para que la curva sea continua
             if (anterior !== null && Math.abs(x - anterior) > 1) l.punto((x + anterior) >> 1, y, '1');
@@ -48,7 +55,7 @@ function tentaculos(l, fase) {
 }
 
 function flotar(i) {
-    return casco(tentaculos(new Lienzo(T, T), i * Math.PI / 2));
+    return casco(tentaculos(new Lienzo(T, T), i * Math.PI / 2), i);
 }
 
 function destello() {
