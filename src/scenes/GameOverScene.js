@@ -21,7 +21,8 @@ export default class GameOverScene extends PantallaSuperpuesta {
     reintentar() {
         this.cameras.main.fadeOut(250, 7, 8, 11);
         this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-            // Reinicia GameScene (está en pausa) con el mismo capítulo y nivel, y cierra esta pantalla
+            // Reinicia GameScene (está en pausa) con el mismo capítulo, nivel y punto de control
+            // (si se alcanzó, se reaparece junto a su terminal), y cierra esta pantalla
             this.scene.start('GameScene', this.datosJuego);
         });
     }

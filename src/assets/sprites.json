@@ -38,7 +38,7 @@
     "archivo": "assets/sprites/tiles-pasillo.png",
     "ancho": 16,
     "alto": 16,
-    "frames": 29,
+    "frames": 40,
     "tipo": "tileset",
     "animaciones": {},
     "propiedades": {
@@ -466,6 +466,42 @@
           1
         ],
         "fps": 4,
+        "repetir": -1
+      }
+    },
+    "propiedades": {}
+  },
+  "fondo-lejano": {
+    "archivo": "assets/sprites/fondo-lejano.png",
+    "ancho": 512,
+    "alto": 256,
+    "frames": 1,
+    "tipo": "sprite",
+    "animaciones": {},
+    "propiedades": {}
+  },
+  "fondo-medio": {
+    "archivo": "assets/sprites/fondo-medio.png",
+    "ancho": 640,
+    "alto": 256,
+    "frames": 1,
+    "tipo": "sprite",
+    "animaciones": {},
+    "propiedades": {}
+  },
+  "terminal-control": {
+    "archivo": "assets/sprites/terminal-control.png",
+    "ancho": 16,
+    "alto": 32,
+    "frames": 3,
+    "tipo": "sprite",
+    "animaciones": {
+      "activa": {
+        "frames": [
+          1,
+          2
+        ],
+        "fps": 3,
         "repetir": -1
       }
     },

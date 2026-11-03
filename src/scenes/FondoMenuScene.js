@@ -3,6 +3,7 @@ import CAPITULOS, { claveNivel } from '../capitulos';
 import { capituloParaContinuar } from '../sistema/progreso';
 import { pistaMusica } from '../sistema/sonido';
 import { COLORES } from '../ui/colores';
+import { crearParallax } from '../ambiente/parallax';
 
 const VOLUMEN_MUSICA_MENU = 0.4;
 
@@ -18,6 +19,7 @@ export default class FondoMenuScene extends Phaser.Scene {
     create() {
         const capitulo = CAPITULOS[0];
         const mapa = this.make.tilemap({ key: claveNivel(capitulo, capitulo.niveles[0]) });
+        crearParallax(this);
         const tilesets = mapa.tilesets.map(t => mapa.addTilesetImage(t.name, t.name));
         if (mapa.getLayer('fondo')) mapa.createLayer('fondo', tilesets, 0, 0);
         mapa.createLayer('plataformas', tilesets, 0, 0);

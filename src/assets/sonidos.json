@@ -309,5 +309,14 @@
     "bucle": true,
     "volumen": 1,
     "duracion": 32
+  },
+  "control-activar": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/control-activar.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.55,
+    "duracion": 2.42
   }
 }

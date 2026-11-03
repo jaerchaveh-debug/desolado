@@ -14,6 +14,11 @@
 //   24 balda de estantería · 25 poste de estantería · 26 hueco oscuro de estantería · 27 caja pequeña de fondo
 // Variantes:
 //   28 cables colgando sin conector (decoración; alternar con el 7)
+// Ventanales (capa "fondo"; transparentes salvo el marco: detrás se ve el fondo parallax):
+//   29 marco sup. · 30 marco inf. · 31 marco izq. · 32 marco der.
+//   33 esquina sup. izq. · 34 esquina sup. der. · 35 esquina inf. izq. · 36 esquina inf. der.
+//   37 parteluz vertical · 38 parteluz con marco sup. · 39 parteluz con marco inf.
+//   El interior del ventanal es un hueco sin tile (0 en el mapa).
 
 import { Lienzo, ruido } from '../tools/pixel/lienzo.js';
 
@@ -247,6 +252,31 @@ function cajaPequenaFondo() {
     return l;
 }
 
+// ---- Ventanales del pozo (capa "fondo"): huecos en el concreto por los que se ve el parallax.
+// El tile es transparente salvo el marco del lado que toca el concreto y, si lo lleva, el parteluz
+// vertical del centro. Marco de 4 px en tonos de fondo (más oscuro que la roca, que es '2'/'3'):
+// junta '0' contra el concreto, perfil '1' con los bordes interiores en '2' y el alféizar con el canto
+// superior en '2' (luz desde arriba), sin línea clara que se lea como repisa pisable.
+const MARCO = 4;
+
+function ventana({ sup = false, inf = false, izq = false, der = false, parteluz = false } = {}) {
+    const l = new Lienzo(T, T);
+    if (parteluz) l.rect(6, 0, 4, T, '1').lineaV(6, 0, T, '2').lineaV(9, 0, T, '2');
+    if (izq) l.rect(0, 0, MARCO, T, '1').lineaV(MARCO - 1, 0, T, '2');
+    if (der) l.rect(T - MARCO, 0, MARCO, T, '1').lineaV(T - MARCO, 0, T, '2');
+    if (sup) l.rect(0, 0, T, MARCO, '1').lineaH(0, MARCO - 1, T, '2');
+    if (inf) {
+        l.rect(0, T - MARCO, T, MARCO, '1').lineaH(0, T - MARCO, T, '2');
+        for (let x = 2; x < T; x += 6) l.punto(x, T - 2, '0');             // tornillería del alféizar
+    }
+    // Juntas contra el concreto al final, para que el alféizar no las tape en las esquinas
+    if (izq) l.lineaV(0, 0, T, '0');
+    if (der) l.lineaV(T - 1, 0, T, '0');
+    if (sup) l.lineaH(0, 0, T, '0');
+    if (inf) l.lineaH(0, T - 1, T, '0');
+    return l;
+}
+
 export default {
     nombre: 'tiles-pasillo',
     tipo: 'tileset',
@@ -259,7 +289,11 @@ export default {
         plataformaColgante(true), plataformaColgante(false), cableSuspension(),
         ...[[0, 0], [1, 0], [0, 1], [1, 1]].map(([c, f]) => trozo(cajaFondo(), c, f)),
         balda(), poste(), huecoEstanteria(), cajaPequenaFondo(),
-        cables(false)
+        cables(false),
+        ventana({ sup: true }), ventana({ inf: true }), ventana({ izq: true }), ventana({ der: true }),
+        ventana({ sup: true, izq: true }), ventana({ sup: true, der: true }),
+        ventana({ inf: true, izq: true }), ventana({ inf: true, der: true }),
+        ventana({ parteluz: true }), ventana({ sup: true, parteluz: true }), ventana({ inf: true, parteluz: true })
     ],
     // Propiedades por índice de tile. GameScene las aplica al cargar cualquier nivel:
     //   solido: colisiona por todos los lados; soloArriba: plataforma atravesable desde abajo

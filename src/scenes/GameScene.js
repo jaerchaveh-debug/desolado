@@ -8,6 +8,7 @@ import Enemigo, { EVENTO_ELIMINADO } from '../objetos/Enemigo';
 import Proyectil from '../objetos/Proyectil';
 import Puerta from '../objetos/Puerta';
 import Jefe, { EVENTO_JEFE_DERROTADO } from '../objetos/Jefe';
+import { crearParallax } from '../ambiente/parallax';
 
 const VELOCIDAD = 120;
 const SALTO = -330;
@@ -58,6 +59,9 @@ const VOLUMEN_MUSICA = 0.5;
 const VOLUMEN_AMBIENTE = 0.8;
 // ms desde la derrota del jefe hasta la pantalla de capítulo completado
 const ESPERA_VICTORIA = 3000;
+// Punto de control: px a la izquierda de la terminal donde reaparece el jugador, y cuánto se ve el aviso
+const REAPARICION_CONTROL = 20;
+const AVISO_CONTROL = 2200;
 const FRAME_VIDA_LLENA = 0;
 const FRAME_VIDA_VACIA = 1;
 const FRAME_ICONO_CARGADO = 0;
@@ -69,9 +73,11 @@ export default class GameScene extends Phaser.Scene {
         super('GameScene');
     }
 
-    // datos: { capitulo: id del capítulo, nivel: índice dentro de capitulo.niveles }
+    // datos: { capitulo: id del capítulo, nivel: índice dentro de capitulo.niveles,
+    //         control: punto de control alcanzado (nombre del objeto del mapa) o null = desde el inicio }
+    // GameOverScene reinicia con estos mismos datos: al reintentar se reaparece en el último control
     init(datos) {
-        this.datos = { capitulo: datos.capitulo, nivel: datos.nivel ?? 0 };
+        this.datos = { capitulo: datos.capitulo, nivel: datos.nivel ?? 0, control: datos.control ?? null };
         this.capitulo = buscarCapitulo(this.datos.capitulo);
         this.aparicion = this.capitulo.aparicion;
         this.claveNivel = claveNivel(this.capitulo, this.capitulo.niveles[this.datos.nivel]);
@@ -95,6 +101,7 @@ export default class GameScene extends Phaser.Scene {
         this.musica = null;
 
         const mapa = this.make.tilemap({ key: this.claveNivel });
+        crearParallax(this);
         // El nombre del tileset en Tiled coincide con la clave de textura generada por `npm run arte`
         const tilesets = mapa.tilesets.map(t => mapa.addTilesetImage(t.name, t.name));
         // Capa "fondo" (opcional, sin colisión) detrás del plano de juego
@@ -110,8 +117,12 @@ export default class GameScene extends Phaser.Scene {
         this.physics.world.setBoundsCollision(true, true, true, false);
 
         // Punto "inicio" de la capa de objetos: donde apoyan los pies del jugador
+        // Con un punto de control alcanzado se empieza junto a su terminal
         const inicio = mapa.findObject('objetos', o => o.name === 'inicio');
-        this.inicio = { x: inicio.x, y: inicio.y - 16 };
+        this.puntoControl = mapa.findObject('objetos', o => o.name === 'control');
+        this.inicio = this.datos.control && this.puntoControl
+            ? { x: this.puntoControl.x - REAPARICION_CONTROL, y: this.puntoControl.y - 16 }
+            : { x: inicio.x, y: inicio.y - 16 };
 
         this.player = this.physics.add.sprite(this.inicio.x, this.inicio.y, 'jugador');
         // Hitbox ajustada al cuerpo (el frame de 16x32 tiene margen transparente)
@@ -323,13 +334,14 @@ export default class GameScene extends Phaser.Scene {
         for (const o of mapa.getObjectLayer('objetos').objects) {
             (this.puntosAparicion[o.name] ??= []).push(o);
         }
-        // Un temporizador de aparición por tipo, que se acelera al eliminar enemigos de ese tipo
+        // Un temporizador de aparición por tipo, que se acelera al eliminar enemigos de ese tipo.
+        // Al reaparecer en el punto de control (ante la sala del jefe) no hay apariciones normales
         this.intervalos = {};
         this.eliminados = {};
         for (const tipo of this.aparicion.tipos) {
             this.intervalos[tipo] = this.aparicion.intervaloInicial;
             this.eliminados[tipo] = 0;
-            this.programarAparicion(tipo);
+            if (!this.datos.control) this.programarAparicion(tipo);
         }
         // Los enemigos que quedan muy lejos del jugador reaparecen dentro de su vista
         this.time.addEvent({ delay: this.aparicion.revisarReubicacion, loop: true, callback: () => this.reubicarLejanos() });
@@ -344,6 +356,26 @@ export default class GameScene extends Phaser.Scene {
         this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.events.off(EVENTO_ELIMINADO));
 
         this.crearSalaJefe(mapa);
+        this.crearControl();
+    }
+
+    // Terminal del punto de control (objeto "control"): al pasar por delante se activa y, desde entonces,
+    // "Volver a intentarlo" reaparece junto a ella. Al reaparecer ya está encendida.
+    crearControl() {
+        this.terminal = null;
+        if (!this.puntoControl) return;
+        this.terminal = this.add.sprite(this.puntoControl.x, this.puntoControl.y, 'terminal-control', 0)
+            .setOrigin(0.5, 1).setDepth(5);
+        if (this.datos.control) this.terminal.play('terminal-control-activa');
+    }
+
+    activarControl() {
+        this.datos.control = this.puntoControl.name;
+        this.terminal.play('terminal-control-activa');
+        sonar(this, 'control-activar', { x: this.terminal.x });
+        const aviso = this.add.bitmapText(this.scale.width / 2, 48, 'fuente', 'SEÑAL REGISTRADA')
+            .setOrigin(0.5).setScrollFactor(0).setDepth(100).setTint(0x47c2c9).setAlpha(0);
+        this.tweens.add({ targets: aviso, alpha: 1, duration: 200, yoyo: true, hold: AVISO_CONTROL, onComplete: () => aviso.destroy() });
     }
 
     // Puerta blindada destructible, compuerta y sala del jefe (objetos "puerta", "compuerta" y "sala-jefe")
@@ -351,7 +383,8 @@ export default class GameScene extends Phaser.Scene {
         const objeto = nombre => mapa.findObject('objetos', o => o.name === nombre);
         const datosPuerta = objeto('puerta');
         this.puerta = null;
-        if (datosPuerta) {
+        // Al reaparecer en el punto de control (que está detrás) la puerta ya está rota
+        if (datosPuerta && !this.datos.control) {
             const puerta = new Puerta(this, datosPuerta.x, datosPuerta.y);
             // Sprite contra grupo: Phaser pasa siempre primero el sprite a los callbacks, así que la puerta va delante
             puerta.registrar(
@@ -982,6 +1015,11 @@ export default class GameScene extends Phaser.Scene {
         if (enSuelo) this.dashEnAire = false;
         if (!this.salaCerrada && this.salaJefe && this.player.x > this.salaJefe.x + ENTRADA_SALA && this.enSalaJefe) {
             this.cerrarSala();
+        }
+        // Punto de control: se activa al llegar a la terminal (a su altura, no desde otro piso)
+        if (this.terminal && !this.datos.control && this.player.x >= this.terminal.x - 8
+            && Math.abs(this.player.body.bottom - this.terminal.y) < 16) {
+            this.activarControl();
         }
 
         // Durante el dash no se controla nada más
