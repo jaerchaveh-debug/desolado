@@ -124,6 +124,7 @@ export default {
 | `control-activar` | `activarControl` (punto de control) |
 | `rastreador-morir` (2) · `cuchillero-ataque` · `cuchillero-morir` | `Enemigo` (`sonidos` del tipo) |
 | `jefe-*` (aterrizar, rugido, zarpazo, golpe, carga, descarga, disparo, rayo-aviso, rayo, morir) · `bola-impacto` | `Jefe` (`JEFES.estibador.sonidos`) · bola contra el nivel o el jugador |
-| `puerta-golpe` (2) · `puerta-rota` · `compuerta-cerrar` | `Puerta` |
+| `puerta-golpe` (2) · `puerta-rota` · `compuerta-cerrar` · `compuerta-abrir` | `Puerta` |
+| `alarma-emboscada` | `empezarEmboscada` |
 | `ambiente-pasillo` | ambiente del capítulo 1 |
 | `musica-ambiente` · `musica-jefe` | alternativas generadas de la música del capítulo 1 (`?musica=generada`) |

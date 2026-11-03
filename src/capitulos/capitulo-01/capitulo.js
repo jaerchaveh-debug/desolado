@@ -27,6 +27,26 @@ export default {
         revisarReubicacion: 500 // ms entre comprobaciones
     },
 
+    // Oleada inicial: 'retardo' ms después de empezar aparecen a la vez estos enemigos (tipo: cantidad),
+    // en los puntos de su tipo cercanos al jugador. No se repite al reaparecer en el punto de control.
+    oleadaInicial: {
+        retardo: 1000,
+        enemigos: { rastreador: 3, cuchillero: 2 }
+    },
+
+    // Encuentros fijos: al tocar el suelo de la zona (rectángulo 'zona' del mapa) cae la compuerta
+    // ('compuerta', objeto del mapa) y suena la alarma; los enemigos normales vivos se retiran y dejan de
+    // aparecer. 'retardo' ms después aparecen todos los 'enemigos' en los puntos de su tipo dentro de la
+    // zona. Al eliminarlos a todos se abre la compuerta y vuelven las apariciones normales.
+    emboscadas: [
+        {
+            zona: 'emboscada',
+            compuerta: 'compuerta-emboscada',
+            retardo: 800,
+            enemigos: { rastreador: 8, cuchillero: 4 }
+        }
+    ],
+
     // Música (rutas dentro de public/assets/): 'ambiente' suena desde el inicio y 'jefe' durante el combate final
     musica: {
         ambiente: 'audio/capitulo-01/ambiente.ogg',

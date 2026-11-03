@@ -318,5 +318,23 @@
     "bucle": false,
     "volumen": 0.55,
     "duracion": 2.42
+  },
+  "alarma-emboscada": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/alarma-emboscada.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.75,
+    "duracion": 4
+  },
+  "compuerta-abrir": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/compuerta-abrir.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.7,
+    "duracion": 2.4
   }
 }

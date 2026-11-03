@@ -62,6 +62,8 @@ const ESPERA_VICTORIA = 3000;
 // Punto de control: px a la izquierda de la terminal donde reaparece el jugador, y cuánto se ve el aviso
 const REAPARICION_CONTROL = 20;
 const AVISO_CONTROL = 2200;
+// Emboscadas: px mínimos entre el jugador y un punto de aparición
+const DISTANCIA_EMBOSCADA = 48;
 const FRAME_VIDA_LLENA = 0;
 const FRAME_VIDA_VACIA = 1;
 const FRAME_ICONO_CARGADO = 0;
@@ -357,6 +359,104 @@ export default class GameScene extends Phaser.Scene {
 
         this.crearSalaJefe(mapa);
         this.crearControl();
+        this.crearEmboscadas(mapa);
+
+        // Oleada inicial: varios enemigos a la vez al poco de empezar (no al reaparecer en el control)
+        const oleada = this.capitulo.oleadaInicial;
+        if (oleada && !this.datos.control) {
+            this.time.delayedCall(oleada.retardo, () => this.aparecerGrupo(oleada.enemigos));
+        }
+    }
+
+    // Aparecen a la vez los enemigos de { tipo: cantidad } repartidos entre los puntos de su tipo:
+    // dentro de la zona si se da (emboscadas) o, si no, los cercanos al jugador. Devuelve los creados.
+    aparecerGrupo(enemigos, zona = null) {
+        const creados = [];
+        for (const [tipo, cantidad] of Object.entries(enemigos)) {
+            for (const p of this.repartirPuntos(tipo, cantidad, zona)) creados.push(this.crearEnemigo(tipo, p));
+        }
+        return creados;
+    }
+
+    // n puntos de aparición del tipo, sin repetir mientras haya; si hay que repetir, con un pequeño
+    // desplazamiento para que los enemigos no salgan unos encima de otros
+    repartirPuntos(tipo, n, zona = null) {
+        const distancia = p => Phaser.Math.Distance.Between(p.x, p.y, this.player.x, this.player.y);
+        let puntos = (this.puntosAparicion[ENEMIGOS[tipo].puntos] ?? []).filter(p => zona
+            ? zona.contains(p.x, p.y) && distancia(p) > DISTANCIA_EMBOSCADA
+            : !this.salaJefe?.contains(p.x, p.y) && distancia(p) > this.aparicion.distanciaMin && distancia(p) < this.aparicion.distanciaMax);
+        if (!puntos.length) puntos = [this.elegirPunto(tipo)].filter(Boolean);
+        if (!puntos.length) return [];
+        puntos = Phaser.Utils.Array.Shuffle([...puntos]);
+        const vuela = ENEMIGOS[tipo].movimiento !== 'suelo';
+        return Array.from({ length: n }, (_, i) => {
+            const p = puntos[i % puntos.length];
+            if (i < puntos.length) return p;
+            return { x: p.x + Phaser.Math.Between(-12, 12), y: vuela ? p.y + Phaser.Math.Between(-12, 12) : p.y };
+        });
+    }
+
+    // Encuentros fijos del capítulo (capitulo.emboscadas): zona del mapa y compuerta que la cierra
+    crearEmboscadas(mapa) {
+        this.emboscada = null;
+        this.emboscadas = (this.capitulo.emboscadas ?? []).map(datos => {
+            const zona = mapa.findObject('objetos', o => o.name === datos.zona);
+            const puntoCompuerta = mapa.findObject('objetos', o => o.name === datos.compuerta);
+            if (!zona) return null;
+            const compuerta = puntoCompuerta ? new Puerta(this, puntoCompuerta.x, puntoCompuerta.y, true) : null;
+            if (compuerta) {
+                this.physics.add.collider(this.player, compuerta);
+                this.physics.add.collider(compuerta, this.enemigos, null, (c, enemigo) => enemigo.caminaPorSuelo);
+                // Las balas se quedan en el metal (no le hacen daño)
+                this.physics.add.overlap(compuerta, this.balas, (c, bala) => {
+                    if (c.body.enable && bala.active) bala.impactar();
+                });
+            }
+            return { datos, zona: new Phaser.Geom.Rectangle(zona.x, zona.y, zona.width, zona.height), compuerta, hecha: false };
+        }).filter(Boolean);
+        const contar = (tipo, enemigo) => this.contarEmboscada(enemigo);
+        this.events.on(EVENTO_ELIMINADO, contar);
+        this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.events.off(EVENTO_ELIMINADO, contar));
+    }
+
+    // Se dispara al tocar el suelo de la zona (no al pasar en el aire ni desde una plataforma intermedia)
+    comprobarEmboscadas() {
+        if (this.emboscada || !this.player.body.blocked.down) return;
+        const e = this.emboscadas.find(e => !e.hecha && e.zona.contains(this.player.x, this.player.body.bottom)
+            && this.player.body.bottom >= e.zona.bottom - 2);
+        if (e) this.empezarEmboscada(e);
+    }
+
+    empezarEmboscada(e) {
+        e.hecha = true;
+        this.emboscada = e;
+        e.restantes = Infinity;   // hasta que aparecen no puede terminar
+        e.compuerta?.cerrar();
+        for (const enemigo of this.enemigos.getChildren()) enemigo.retirar();
+        sonar(this, 'alarma-emboscada');
+        this.cameras.main.shake(250, 0.006);
+        const aviso = this.add.bitmapText(this.scale.width / 2, 48, 'fuente', 'ALERTA: INTRUSO DETECTADO')
+            .setOrigin(0.5).setScrollFactor(0).setDepth(100).setTint(0xb3262a);
+        // Parpadea como una alarma y se apaga
+        this.tweens.add({ targets: aviso, alpha: 0.2, duration: 180, yoyo: true, repeat: 5, onComplete: () => aviso.destroy() });
+        this.time.delayedCall(e.datos.retardo, () => {
+            if (this.muerto) return;
+            const creados = this.aparecerGrupo(e.datos.enemigos, e.zona);
+            creados.forEach(enemigo => { enemigo.emboscada = true; });
+            e.restantes = creados.length;
+            if (!e.restantes) this.terminarEmboscada();
+        });
+    }
+
+    contarEmboscada(enemigo) {
+        if (!this.emboscada || !enemigo?.emboscada) return;
+        if (--this.emboscada.restantes <= 0) this.terminarEmboscada();
+    }
+
+    // Todos eliminados: se abre la compuerta y vuelven las apariciones normales
+    terminarEmboscada() {
+        this.emboscada.compuerta?.abrir();
+        this.emboscada = null;
     }
 
     // Terminal del punto de control (objeto "control"): al pasar por delante se activa y, desde entonces,
@@ -736,7 +836,8 @@ export default class GameScene extends Phaser.Scene {
 
     // Enemigos vivos demasiado lejos del jugador: reaparecen en un punto visible de su tipo
     reubicarLejanos() {
-        if (this.muerto || this.salaCerrada) return;
+        // En una emboscada no: podría llevar a un enemigo al otro lado de la compuerta
+        if (this.muerto || this.salaCerrada || this.emboscada) return;
         for (const enemigo of this.enemigos.getChildren()) {
             if (!enemigo.vivo || enemigo.reubicando) continue;
             const d = Phaser.Math.Distance.Between(enemigo.x, enemigo.y, this.player.x, this.player.y);
@@ -748,15 +849,18 @@ export default class GameScene extends Phaser.Scene {
 
     // refuerzo: aparición del combate contra el jefe (en la sala, con su propio máximo)
     aparecerEnemigo(tipo, refuerzo = false) {
-        // Con la sala cerrada solo aparecen los refuerzos del jefe
-        if (this.salaCerrada !== refuerzo || this.victoria) return;
+        // Con la sala cerrada solo aparecen los refuerzos del jefe; durante una emboscada, ninguno más
+        if (this.salaCerrada !== refuerzo || this.victoria || this.emboscada) return;
         const maximo = refuerzo ? this.capitulo.jefe.refuerzos.maximo : this.aparicion.maximo;
         const vivos = this.enemigos.getChildren().filter(e => e.vivo).length;
         if (vivos >= maximo) return;
 
         const p = this.elegirPunto(tipo);
-        if (!p) return;
+        if (p) this.crearEnemigo(tipo, p);
+    }
 
+    // Enemigo nuevo en el punto p (con un fundido de entrada)
+    crearEnemigo(tipo, p) {
         const enemigo = new Enemigo(this, p.x, p.y, tipo, this.player);
         this.enemigos.add(enemigo);
         enemigo.configurarCuerpo();
@@ -764,6 +868,7 @@ export default class GameScene extends Phaser.Scene {
         if (enemigo.caminaPorSuelo) enemigo.y = p.y - enemigo.height / 2;
         enemigo.setAlpha(0);
         this.tweens.add({ targets: enemigo, alpha: 1, duration: 400 });
+        return enemigo;
     }
 
     // Origen y dirección (vector unitario) del ataque según hacia dónde apunta y mira el jugador.
@@ -1016,6 +1121,7 @@ export default class GameScene extends Phaser.Scene {
         if (!this.salaCerrada && this.salaJefe && this.player.x > this.salaJefe.x + ENTRADA_SALA && this.enSalaJefe) {
             this.cerrarSala();
         }
+        this.comprobarEmboscadas();
         // Punto de control: se activa al llegar a la terminal (a su altura, no desde otro piso)
         if (this.terminal && !this.datos.control && this.player.x >= this.terminal.x - 8
             && Math.abs(this.player.body.bottom - this.terminal.y) < 16) {

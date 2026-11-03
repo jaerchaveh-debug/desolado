@@ -9,8 +9,8 @@ const PIEZAS_CHATARRA = 10;
 // Puerta blindada destructible (sprite 'puerta-metal' con cuerpo estático). Bloquea al jugador y a los
 // enemigos de suelo hasta que recibe PUERTA.vida de daño. Admite el mismo daño que un enemigo
 // (recibirDanio, vivo, reubicando), así que las balas y los ataques en área la golpean igual.
-// Con indestructible = true es la compuerta de la sala del jefe: empieza abierta (escondida en el
-// techo) y cae con cerrar().
+// Con indestructible = true es una compuerta (sala del jefe, emboscadas): empieza abierta (escondida en el
+// techo), cae con cerrar() y vuelve a subir con abrir().
 export default class Puerta extends Phaser.Physics.Arcade.Sprite {
 
     // (x, y): centro inferior de la puerta (donde apoya en el suelo)
@@ -78,6 +78,19 @@ export default class Puerta extends Phaser.Physics.Arcade.Sprite {
         this.scene.cameras.main.shake(200, 0.012);
         this.colisiones.forEach(c => this.scene.physics.world.removeCollider(c));
         this.destroy();
+    }
+
+    // Compuerta: sube despacio hasta esconderse en el techo y deja de bloquear (al vencer una emboscada)
+    abrir() {
+        this.body.enable = false;
+        sonar(this.scene, 'compuerta-abrir', { x: this.x });
+        this.scene.tweens.add({
+            targets: this,
+            y: this.cerradaY - this.height,
+            duration: 900,
+            ease: 'Sine.easeInOut',
+            onComplete: () => this.setVisible(false)
+        });
     }
 
     // Compuerta: cae desde el techo y empieza a bloquear
