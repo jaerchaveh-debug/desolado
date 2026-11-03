@@ -112,6 +112,7 @@ export const ARMAS_INICIALES = ['pistola', 'espada'];
 // ataque (opcional): ataque cuerpo a cuerpo con la animación '<sprite>-atacar'
 //   alcance: px por delante a los que empieza el ataque · danio: daño si el golpe acierta
 //   frameGolpe: frame de la hoja en el que se comprueba el impacto · enfriamiento: ms entre ataques
+// sonidos: nombres de sonido/*.js para golpe (daño sin morir), ataque y morir
 export const ENEMIGOS = {
     // Robot flotante con tentáculos: persigue al jugador atravesando la estructura
     rastreador: {
@@ -123,6 +124,7 @@ export const ENEMIGOS = {
         danio: 1,           // daño al jugador por contacto
         velocidad: 35,
         colorGolpe: 0xe4eaf0,
+        sonidos: { golpe: 'impacto-metal', morir: 'rastreador-morir' },
         hitbox: { ancho: 14, alto: 16, x: 5, y: 1 }
     },
     // Robot humanoide blanco a seis patas con brazos-cuchilla: patrulla el suelo hacia el jugador
@@ -136,6 +138,7 @@ export const ENEMIGOS = {
         ataque: { alcance: 26, danio: 1, frameGolpe: 8, enfriamiento: 900 },
         velocidad: 45,
         colorGolpe: 0xb3262a,   // es blanco: el destello de golpe va en rojo para que se note
+        sonidos: { golpe: 'impacto-metal', ataque: 'cuchillero-ataque', morir: 'cuchillero-morir' },
         // Cubre torso y cabeza para que la pistola (a la altura del pecho del jugador) le alcance
         hitbox: { ancho: 22, alto: 21, x: 7, y: 3 }
     }
@@ -155,6 +158,12 @@ export const JEFES = {
         velocidad: 40,
         salto: -400,            // sube pilas de dos cajas (64 px)
         colorGolpe: 0xe4eaf0,
+        // Sonidos (sonido/*.js) de cada momento de su máquina de estados
+        sonidos: {
+            golpe: 'jefe-golpe', aterrizar: 'jefe-aterrizar', rugido: 'jefe-rugido', zarpazo: 'jefe-zarpazo',
+            carga: 'jefe-carga', descarga: 'jefe-descarga', disparo: 'jefe-disparo',
+            rayoAviso: 'jefe-rayo-aviso', rayo: 'jefe-rayo', morir: 'jefe-morir'
+        },
         hitbox: { ancho: 24, alto: 58, x: 12, y: 5 },
         ojos: { x: 3, y: -23 },
         garra: { x: 22, y: -9 },

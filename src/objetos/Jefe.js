@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { JEFES } from '../config/combate';
+import { sonar } from '../sistema/sonido';
 
 // Evento de escena que se emite al derrotar al jefe
 export const EVENTO_JEFE_DERROTADO = 'jefe-derrotado';
@@ -85,6 +86,7 @@ export default class Jefe extends Phaser.Physics.Arcade.Sprite {
             this.morir();
             return;
         }
+        this.efectoSonoro('golpe');
         this.setTint(this.datos.colorGolpe).setTintMode(Phaser.TintModes.FILL);
         this.scene.time.delayedCall(60, () => this.active && this.clearTint());
     }
@@ -92,12 +94,19 @@ export default class Jefe extends Phaser.Physics.Arcade.Sprite {
     morir() {
         this.vivo = false;
         this.estado = 'muerto';
+        this.efectoSonoro('morir');
         this.clearTint();
         this.setVelocityX(0);
         this.limpiarEfectos();
         this.play(this.anim('morir'));
         this.scene.cameras.main.shake(400, 0.012);
         this.scene.events.emit(EVENTO_JEFE_DERROTADO);
+    }
+
+    // Sonido de 'datos.sonidos' para un momento de su máquina de estados, situado en su posición
+    efectoSonoro(momento) {
+        const nombre = this.datos.sonidos?.[momento];
+        if (nombre) sonar(this.scene, nombre, { x: this.x, variacion: 0.02 });
     }
 
     limpiarEfectos() {
@@ -135,9 +144,13 @@ export default class Jefe extends Phaser.Physics.Arcade.Sprite {
     aterrizar() {
         this.estado = 'rugido';
         this.setFrame(FRAME_QUIETO);
+        this.efectoSonoro('aterrizar');
         this.scene.cameras.main.shake(300, 0.015);
-        // Ojos encendidos un instante antes de empezar
-        this.despues(400, () => this.setFrame(FRAME_RAYO));
+        // Ojos encendidos y rugido un instante antes de empezar
+        this.despues(400, () => {
+            this.setFrame(FRAME_RAYO);
+            this.efectoSonoro('rugido');
+        });
         this.despues(1100, () => this.volverAAcechar());
     }
 
@@ -196,6 +209,7 @@ export default class Jefe extends Phaser.Physics.Arcade.Sprite {
         const origen = this.punto(garra);
         const objetivo = this.objetivo.body.center;
         const d = Math.hypot(objetivo.x - origen.x, objetivo.y - origen.y) || 1;
+        this.efectoSonoro('disparo');
         this.scene.dispararBolaJefe(origen.x, origen.y, { x: (objetivo.x - origen.x) / d, y: (objetivo.y - origen.y) / d }, disparo);
         // Pose de disparo un instante; acechar() reanuda el paso al terminar
         this.anims.pause();
@@ -216,6 +230,7 @@ export default class Jefe extends Phaser.Physics.Arcade.Sprite {
     golpearZarpazo() {
         if (!this.vivo || this.zarpazoGolpeado) return;
         this.zarpazoGolpeado = true;
+        this.efectoSonoro('zarpazo');
         const delante = this.dx * (this.flipX ? -1 : 1);
         const { alcance, danio } = this.datos.zarpazo;
         if (delante > -8 && delante < alcance + 10 && Math.abs(this.objetivo.body.bottom - this.body.bottom) < this.datos.cerca.y) {
@@ -242,12 +257,14 @@ export default class Jefe extends Phaser.Physics.Arcade.Sprite {
         const { carga, radio, danio } = this.datos.cargado;
         this.estado = 'cargando';
         this.play(this.anim('cargar'));
+        this.efectoSonoro('carga');
         const aviso = this.efecto(this.scene.add.image(this.x, this.body.center.y, 'onda-jefe', 0).setDepth(PROFUNDIDAD_EFECTOS));
         // El aviso parpadea cada vez más rápido
         this.scene.tweens.add({ targets: aviso, alpha: 0.2, duration: 160, yoyo: true, repeat: -1 });
         this.despues(carga, () => {
             aviso.destroy();
             this.play(this.anim('descarga'));
+            this.efectoSonoro('descarga');
             const onda = this.efecto(this.scene.add.sprite(this.x, this.body.center.y, 'onda-jefe', 1).setDepth(PROFUNDIDAD_EFECTOS));
             onda.play('onda-jefe-descargar');
             onda.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => onda.destroy());
@@ -284,6 +301,7 @@ export default class Jefe extends Phaser.Physics.Arcade.Sprite {
         const largo = Math.max(8, this.scene.alcanceLibre(origen.x, origen.y, dir, alcance));
 
         // Fase 1: marca fina hacia donde está el jugador ahora
+        this.efectoSonoro('rayoAviso');
         const haz = this.efecto(this.scene.add.tileSprite(origen.x, origen.y, largo, 8, 'rayo-jefe', 0)
             .setOrigin(0, 0.5).setRotation(Math.atan2(dir.y, dir.x)).setDepth(PROFUNDIDAD_EFECTOS));
         this.scene.tweens.add({ targets: haz, alpha: 0.4, duration: 90, yoyo: true, repeat: -1 });
@@ -292,6 +310,7 @@ export default class Jefe extends Phaser.Physics.Arcade.Sprite {
         this.despues(aviso, () => {
             this.scene.tweens.killTweensOf(haz);
             haz.setAlpha(1).setFrame(1);
+            this.efectoSonoro('rayo');
             this.scene.cameras.main.shake(90, 0.006);
             if (this.distanciaALinea(this.objetivo.body.center, origen, dir, largo) < ancho / 2 + 5) {
                 this.scene.danarJugador(danio, this.x);

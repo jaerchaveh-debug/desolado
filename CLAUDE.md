@@ -32,6 +32,10 @@ npm run build          # build de producción en dist/
 npm run preview        # servir el build de dist/
 npm run arte [nombre]  # generar los PNG desde arte/*.js (todos o uno)
 npm run arte:revisar   # validar los PNG contra la guía de arte
+npm run arte:ver [nombre]   # visor en vivo del arte (http://localhost:4321), regenera al guardar
+npm run arte:texto nombre [frame]  # volcar frames como caracteres de la paleta
+npm run sonido [nombre]     # generar los WAV desde sonido/*.js (todos o uno)
+npm run sonido:revisar      # validar los WAV (saturación, empalme de bucles, niveles...)
 ```
 
 - Repositorio: https://github.com/jaerchaveh-debug/desolado (rama `main`). Cada push a `main` publica el juego en GitHub Pages (https://jaerchaveh-debug.github.io/desolado/) con `.github/workflows/pages.yml`. `vite.config.js` usa `base: './'` para que el build funcione en la subcarpeta `/desolado/`: cargar siempre los recursos con rutas relativas (`assets/...`), nunca con `/assets/...`.
@@ -44,7 +48,10 @@ vite.config.js               # base relativa ('./') para GitHub Pages
 .github/workflows/pages.yml  # build y publicación en GitHub Pages
 arte/                        # FUENTE del pixel art: cada .js define un sprite o tileset en código
   preview/                   # vistas ampliadas x8 (generadas, ignoradas por git)
-tools/pixel/                 # paleta, Lienzo, codificador PNG, generador y revisor (Node, sin dependencias)
+sonido/                      # FUENTE del audio: cada .js sintetiza un efecto, ambiente o música
+  preview/                   # forma de onda y espectrograma de cada sonido (generados, ignorados por git)
+tools/pixel/                 # paleta y rampas, Lienzo (formas, degradados, tramado, contorno, recolor), PNG, generador, revisor, visor y volcado en texto (Node, sin dependencias)
+tools/sonido/                # sintetizador, codificador WAV, generador, espectrograma y revisor (Node, sin dependencias)
 src/
   main.js                    # crea Phaser.Game con la configuración
   config/gameConfig.js       # resolución, escalado, físicas y lista de escenas
@@ -52,6 +59,7 @@ src/
   capitulos/index.js         # lista ordenada de capítulos (+ buscarCapitulo, claveNivel)
   capitulos/capitulo-NN/capitulo.js # título, niveles, aparición de enemigos y condición de victoria del capítulo
   sistema/progreso.js        # progreso guardado en localStorage (desbloqueos, último capítulo)
+  sistema/sonido.js          # sonar(): efectos con variantes, panorámica y atenuación; música generada (?musica=generada)
   ui/MenuOpciones.js         # lista de opciones navegable (teclado y ratón) con cursor
   ui/colores.js              # colores de la paleta para la interfaz
   objetos/Enemigo.js         # enemigo genérico por tipo (volar / suelo): persigue, recibe daño, muere
@@ -59,6 +67,7 @@ src/
   objetos/Puerta.js          # puerta blindada destructible y compuerta de la sala del jefe
   objetos/Jefe.js            # jefe genérico por tipo (JEFES): máquina de estados de sus ataques
   assets/sprites.json        # manifiesto generado por `npm run arte` (no editar)
+  assets/sonidos.json        # manifiesto generado por `npm run sonido` (no editar)
   scenes/PreloadScene.js     # carga todo el manifiesto y crea las animaciones
   scenes/GameScene.js        # escena jugable: nivel de Tiled, cámara, combate, vida y HUD
   scenes/FondoMenuScene.js   # fondo de los menús: primer nivel oscurecido con paneo lento
@@ -72,12 +81,14 @@ src/
   scenes/CapituloCompletadoScene.js # "Capítulo N completado" tras la victoria del capítulo
 public/assets/sprites/       # PNG y tilesets .tsj generados (no editar a mano)
 public/assets/niveles/capitulo-NN/ # mapas de Tiled en JSON de cada capítulo (tileset incrustado)
+public/assets/sonidos/       # WAV generados (no editar a mano)
 public/assets/audio/capitulo-NN/ # música de cada capítulo (ambiente.ogg, jefe.mp3), declarada en `musica` del capítulo
 public/assets/{fonts,spritesheets,tilemaps}/ # reservadas para el futuro
 .claude/skills/guia-arte     # guía de estilo visual (paleta, tamaños, luz, composición)
 .claude/skills/sprite-pixel  # procedimiento para crear assets con código
 .claude/skills/nivel-tiled   # formato y diseño de niveles de Tiled
 .claude/skills/ambientacion  # parallax, niebla, partículas, luces, filtros y cámara en Phaser 4
+.claude/skills/sonido        # identidad sonora, síntesis de efectos y música, mezcla e integración
 .claude/agents/revisor-arte  # agente que revisa assets contra la guía
 .claude/agents/investigador-phaser4  # agente que verifica APIs de Phaser 4 en node_modules
 ```
@@ -89,6 +100,10 @@ public/assets/{fonts,spritesheets,tilemaps}/ # reservadas para el futuro
   - Para añadir un capítulo: copiar `capitulo-01/capitulo.js` a `capitulo-NN/`, crear sus mapas en `public/assets/niveles/capitulo-NN/` e importarlo en `src/capitulos/index.js` (sustituyendo el marcador).
 - Progreso (`src/sistema/progreso.js`, clave `desolado:progreso` de localStorage, con respaldo en memoria si no hay almacenamiento): al inicio solo está desbloqueado el capítulo 1. `completarCapitulo(id)` desbloquea el siguiente; `GameScene.jefeDerrotado` lo llama cuando la victoria del capítulo es `'jefe'`. "Continuar" empieza el último capítulo jugado (`registrarInicio`).
 - Música: `PreloadScene` carga las pistas de `musica` de cada capítulo disponible con la clave `claveMusica(capitulo, nombre)` (`capitulo-NN/musica-<nombre>`). `GameScene.crearMusica` empieza `ambiente` (en bucle, volumen `VOLUMEN_MUSICA` 0,5); `reproducirMusica(nombre)` cambia de pista con fundido cruzado y `apagarMusica(ms)` la apaga con fundido. Las pistas (`this.pistas`) se pausan con la escena (pausa, muerte) y se destruyen en `SHUTDOWN`. Al morir, la música se apaga; al cerrarse la sala del jefe se apaga el ambiente y entra `jefe` con el jefe; al vencerlo se apaga.
+  - Menús: `FondoMenuScene` reproduce en bucle la pista `ambiente` del capítulo de "Continuar" (`capituloParaContinuar`) a `VOLUMEN_MUSICA_MENU` (0,4); `MenuBase.jugar` la apaga con fundido y se destruye al detener la escena. Hasta la primera tecla o clic el navegador no deja sonar audio: Phaser la arranca entonces. La elección de pista (original o generada) la hace `pistaMusica()` de `sistema/sonido.js`, común al menú y a `GameScene`.
+  - Ambiente: `ambiente` del capítulo (sonido de tipo `ambiente`, p. ej. `ambiente-pasillo`) suena en bucle bajo la música (`VOLUMEN_AMBIENTE`), en `this.pistas`.
+  - Alternativas generadas: con `?musica=generada` en la URL, `reproducirMusica(nombre)` usa `musica-<nombre>` de sonido/ en lugar de la pista del capítulo.
+- Efectos de sonido: **todo el audio se sintetiza con código** en `sonido/*.js` (`npm run sonido`); antes de crear o tocar uno, carga la skill `sonido`. En el juego, `sonar(scene, nombre, { x })` de `src/sistema/sonido.js`; los de enemigos y jefe se declaran en `sonidos` de su tipo en `config/combate.js` y suenan con `efectoSonoro(momento)`.
   - Probar en Edge sin interfaz: con `--virtual-time-budget` el navegador **no termina de decodificar el audio** y `PreloadScene` no acaba; para las pruebas de lógica, crear el juego con `audio: { noAudio: true }`, y la música probarla en tiempo real (Edge con `--remote-debugging-port` y un script de Node por CDP).
 - Carpetas reservadas para el futuro en `public/assets/`: `fonts`, `spritesheets`, `tilemaps` (y `audio`, ya en uso). No borrarlas; llevan un `.gitkeep` para que git las conserve vacías. Previstas: `BootScene` y `MenuScene` (comentadas en `gameConfig.js`). Cada escena es una clase que extiende `Phaser.Scene` en su propio archivo de `src/scenes/`, con la clave igual al nombre de la clase.
 - Las texturas se llaman como el archivo de `arte/` (`jugador`, `tiles-pasillo`) y las animaciones `<sprite>-<animacion>` (`jugador-correr`).
@@ -132,7 +147,7 @@ public/assets/{fonts,spritesheets,tilemaps}/ # reservadas para el futuro
 - Dash (Shift, `JUGADOR.dash`): impulso horizontal de `distancia` px (96) en `duracion` ms (150), hacia donde se pulsa o, sin dirección, hacia donde mira. Sin gravedad ni control mientras dura, **invulnerable** (`danarJugador` lo ignora) y con una estela de siluetas cian. Termina al recorrer la distancia (se corrige si el último frame se pasa), al chocar con un muro o una puerta, o por seguridad al doble de la duración. `enfriamiento` 800 ms desde que termina; en el aire solo uno por salto (`dashEnAire`, se repone al tocar suelo). No se puede durante la carga de la espada ni en el retroceso de un golpe.
 - Puerta blindada (objeto `puerta` del mapa, clase `Puerta`, sprite `puerta-metal` 16x64): cuerpo estático que bloquea al jugador y a los enemigos de suelo. Tiene `PUERTA.vida` (10) y recibe daño de **todos** los ataques: las balas y la onda de la espada se quedan en ella (overlap), y el estallido y el tajo la incluyen en `objetivosDanables()` (que usa `danarFranja`). Su frame (0-3) muestra el daño; al llegar a 0 revienta en `chatarra` y retira sus colisiones (`registrar`). Ojo: en un collider/overlap entre un sprite suelto y un grupo, Phaser pasa **primero el sprite** a los callbacks, por eso se registran como `(puerta, grupo)`.
 - Sala del jefe (rectángulo `sala-jefe`): al adentrarse `ENTRADA_SALA` px, `cerrarSala()` deja caer la compuerta (objeto `compuerta`: `Puerta` indestructible, frame 4, escondida en el techo hasta `cerrar()`), retira los enemigos normales vivos (`Enemigo.retirar()`, sin contar como eliminados), corta las apariciones normales y las reubicaciones (`salaCerrada`), limita la cámara a la sala y apaga la música de ambiente. Tras `jefe.retardo` ms (1,5 s), `iniciarJefe()` hace caer al jefe del techo en el objeto `jefe` del mapa, pone su música, su barra de vida (`barra-jefe` arriba en el centro, recortada según la vida, con el nombre debajo) y los **refuerzos**: un enemigo cada `refuerzos.intervalo` ms fijos (2 s), alternando `refuerzos.tipos`, con un máximo de `refuerzos.maximo` (10) vivos, en los puntos `enemigo` / `enemigo-suelo` **de dentro de la sala** (`elegirPunto` usa los de dentro solo con la sala cerrada, y los de fuera solo con ella abierta).
-- Jefe `estibador` (`JEFES.estibador`, clase `Jefe`, sprite `jefe-estibador` 48x64, el doble que el jugador): humanoide negro con ojos y garras metálicas, `vida` 50. Solo choca con tiles sólidos (sube a las cajas, atraviesa las plataformas colgantes). Recibe daño como un enemigo (está en `objetivosDanables()` y tiene overlap con las balas). Estados (`estado`):
+- Jefe `estibador` (`JEFES.estibador`, clase `Jefe`, sprite `jefe-estibador` 48x64, el doble que el jugador): humanoide negro de cuatro piernas con ojos y garras metálicas, `vida` 50. Solo choca con tiles sólidos (sube a las cajas, atraviesa las plataformas colgantes). Recibe daño como un enemigo (está en `objetivosDanables()` y tiene overlap con las balas). Estados (`estado`):
   - `entrada`: cae del techo, invulnerable; al aterrizar ruge (ojos encendidos) y empieza.
   - `acechar`: mira al jugador. **Cerca** (`cerca`: 72 px en horizontal, 44 en vertical): se para y lanza un zarpazo si está listo. **Lejos**: camina hacia él (salta los obstáculos con `salto` si hay hueco a `ALTURA_SALTABLE` px; un muro no) y dispara `bola-energia` desde la garra (`disparo`: daño 1, 200 px/s, cada 700 ms) al grupo `balasJefe` (`dispararBolaJefe`), que el dash esquiva. Tras `disparo.duracion` ms (4 s) lejos, pasa a `rayos`.
   - `zarpazo`: como el cuchillero (alza las garras y golpea delante; `frameGolpe` 6, un solo impacto aunque el frame salga dos veces), daño 1, `enfriamiento` 600 ms. Cada `cargado.cadaZarpazos` (3) zarpazos, `cargando`.
@@ -157,6 +172,5 @@ public/assets/{fonts,spritesheets,tilemaps}/ # reservadas para el futuro
 
 ## Estado actual / pendientes conocidos
 
-- El tile de cables (7) apenas se ve sobre el fondo; aclararlo cuando haya capa de fondo.
 - Las celdas vacías del HUD tienen poco contraste sobre los muros; mejorará con un marco o fondo para el HUD.
 - Sin fondo parallax.

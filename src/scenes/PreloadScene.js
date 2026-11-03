@@ -1,9 +1,11 @@
 import Phaser from 'phaser';
 import sprites from '../assets/sprites.json';
 import CAPITULOS, { claveNivel, claveMusica } from '../capitulos';
+import { cargarSonidos } from '../sistema/sonido';
 
 // Carga todas las hojas generadas con `npm run arte` (ver src/assets/sprites.json),
-// crea sus animaciones con la clave "<sprite>-<animacion>" y carga los niveles de Tiled y la música.
+// crea sus animaciones con la clave "<sprite>-<animacion>" y carga los niveles de Tiled, la música
+// y los sonidos generados con `npm run sonido` (ver src/assets/sonidos.json).
 export default class PreloadScene extends Phaser.Scene {
 
     constructor() {
@@ -25,6 +27,7 @@ export default class PreloadScene extends Phaser.Scene {
                 this.load.audio(claveMusica(capitulo, nombre), `assets/${ruta}`);
             }
         }
+        cargarSonidos(this);
     }
 
     create() {

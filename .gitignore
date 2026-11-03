@@ -25,3 +25,6 @@ dist-ssr
 
 # Vistas previas ampliadas del arte (se regeneran con npm run arte)
 arte/preview
+
+# Espectrogramas de los sonidos (se regeneran con npm run sonido)
+sonido/preview

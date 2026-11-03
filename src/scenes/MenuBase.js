@@ -41,7 +41,9 @@ export default class MenuBase extends Phaser.Scene {
     jugar(capitulo) {
         registrarInicio(capitulo.id);
         this.cameras.main.fadeOut(400, 7, 8, 11);
-        this.scene.get('FondoMenuScene').cameras.main.fadeOut(400, 7, 8, 11);
+        const fondo = this.scene.get('FondoMenuScene');
+        fondo.cameras.main.fadeOut(400, 7, 8, 11);
+        fondo.apagarMusica(400);
         this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
             this.scene.stop('FondoMenuScene');
             this.scene.start('GameScene', { capitulo: capitulo.id, nivel: 0 });

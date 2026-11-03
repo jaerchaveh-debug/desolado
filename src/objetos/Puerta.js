@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { PUERTA } from '../config/combate';
+import { sonar } from '../sistema/sonido';
 
 const FRAMES_DANIO = 4;      // frames 0-3 de 'puerta-metal': de intacta a destrozada
 const FRAME_COMPUERTA = 4;
@@ -48,6 +49,7 @@ export default class Puerta extends Phaser.Physics.Arcade.Sprite {
             this.romper();
             return;
         }
+        sonar(this.scene, 'puerta-golpe', { x: this.x });
         // Más abollada cuanto menos vida le queda
         this.setFrame(Math.min(FRAMES_DANIO - 1, Math.floor((1 - this.vida / PUERTA.vida) * FRAMES_DANIO)));
         this.setTint(PUERTA.colorGolpe).setTintMode(Phaser.TintModes.FILL);
@@ -58,6 +60,7 @@ export default class Puerta extends Phaser.Physics.Arcade.Sprite {
     // Revienta en pedazos de chatarra que saltan y caen
     romper() {
         this.vivo = false;
+        sonar(this.scene, 'puerta-rota', { x: this.x });
         const { x, y } = this.getCenter();
         for (let i = 0; i < PIEZAS_CHATARRA; i++) {
             const pieza = this.scene.add.image(x + Phaser.Math.Between(-4, 4), y + Phaser.Math.Between(-24, 24), 'chatarra', i % 3)
@@ -80,6 +83,7 @@ export default class Puerta extends Phaser.Physics.Arcade.Sprite {
     // Compuerta: cae desde el techo y empieza a bloquear
     cerrar() {
         this.setVisible(true);
+        sonar(this.scene, 'compuerta-cerrar');   // el sonido incluye la caída hasta el impacto
         this.scene.tweens.add({
             targets: this,
             y: this.cerradaY,

@@ -1,8 +1,9 @@
 import Phaser from 'phaser';
 import sprites from '../assets/sprites.json';
 import { JUGADOR, ARMAS, ARMAS_INICIALES, ENEMIGOS, JEFES, CURACION } from '../config/combate';
-import { buscarCapitulo, claveNivel, claveMusica } from '../capitulos';
+import { buscarCapitulo, claveNivel } from '../capitulos';
 import { completarCapitulo } from '../sistema/progreso';
+import { sonar, claveSonido, datosSonido, pistaMusica } from '../sistema/sonido';
 import Enemigo, { EVENTO_ELIMINADO } from '../objetos/Enemigo';
 import Proyectil from '../objetos/Proyectil';
 import Puerta from '../objetos/Puerta';
@@ -53,6 +54,8 @@ const ESTELA_DASH = 25;
 // px que hay que adentrarse en la sala del jefe para que se cierre la compuerta
 const ENTRADA_SALA = 64;
 const VOLUMEN_MUSICA = 0.5;
+// Ambiente del capítulo (ruido industrial en bucle bajo la música); se multiplica por su 'volumen' del manifiesto
+const VOLUMEN_AMBIENTE = 0.8;
 // ms desde la derrota del jefe hasta la pantalla de capítulo completado
 const ESPERA_VICTORIA = 3000;
 const FRAME_VIDA_LLENA = 0;
@@ -166,7 +169,8 @@ export default class GameScene extends Phaser.Scene {
         this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.events.off(Phaser.Scenes.Events.RESUME, olvidarTeclas));
     }
 
-    // Música del capítulo: empieza 'ambiente'; las pistas se pausan con la escena y se destruyen al cerrarla
+    // Música del capítulo: empieza 'ambiente' y, debajo, el ambiente industrial en bucle del capítulo.
+    // Las pistas se pausan con la escena y se destruyen al cerrarla
     crearMusica() {
         this.pistas = [];
         const pausar = () => this.pistas.forEach(p => p.isPlaying && p.pause());
@@ -180,17 +184,26 @@ export default class GameScene extends Phaser.Scene {
             this.pistas = [];
         });
         this.reproducirMusica('ambiente');
+
+        const ambiente = this.capitulo.ambiente;
+        if (ambiente && this.cache.audio.exists(claveSonido(ambiente))) {
+            const pista = this.sound.add(claveSonido(ambiente), { loop: true, volume: 0 });
+            this.pistas.push(pista);
+            pista.play();
+            this.tweens.add({ targets: pista, volume: datosSonido(ambiente).volumen * VOLUMEN_AMBIENTE, duration: 2000 });
+        }
     }
 
-    // Cambia a otra pista del capítulo con un fundido cruzado
+    // Cambia a otra pista del capítulo con un fundido cruzado. Con ?musica=generada en la URL usa la
+    // alternativa generada (sonido/musica-<nombre>.js) si existe, para comparar con la original.
     reproducirMusica(nombre) {
-        const clave = claveMusica(this.capitulo, nombre);
-        if (!this.capitulo.musica?.[nombre] || !this.cache.audio.exists(clave)) return;
+        const datos = pistaMusica(this, this.capitulo, nombre);
+        if (!datos) return;
         this.apagarMusica(800);
-        const pista = this.sound.add(clave, { loop: true, volume: 0 });
+        const pista = this.sound.add(datos.clave, { loop: true, volume: 0 });
         this.pistas.push(pista);
         pista.play();
-        this.tweens.add({ targets: pista, volume: VOLUMEN_MUSICA, duration: 1200 });
+        this.tweens.add({ targets: pista, volume: VOLUMEN_MUSICA * datos.volumen, duration: 1200 });
         this.musica = pista;
     }
 
@@ -292,7 +305,10 @@ export default class GameScene extends Phaser.Scene {
         this.enemigos = this.physics.add.group({ allowGravity: false });
 
         // Las balas se detienen en los tiles sólidos (las rejillas solo colisionan por arriba, así que las atraviesan)
-        this.physics.add.collider(this.balas, this.nivel, bala => bala.impactar());
+        this.physics.add.collider(this.balas, this.nivel, bala => {
+            sonar(this, 'impacto-muro', { x: bala.x });
+            bala.impactar();
+        });
         // Solo los enemigos de suelo chocan con los tiles; los voladores los atraviesan
         this.physics.add.collider(this.enemigos, this.nivel, null, enemigo => enemigo.caminaPorSuelo);
         this.physics.add.overlap(this.player, this.enemigos, (jugador, enemigo) => {
@@ -364,9 +380,13 @@ export default class GameScene extends Phaser.Scene {
 
         // Bolas de energía del jefe: dañan al jugador (salvo durante el dash) y se detienen en los tiles
         this.balasJefe = this.physics.add.group({ classType: Proyectil, maxSize: 20, allowGravity: false });
-        this.physics.add.collider(this.balasJefe, this.nivel, bala => bala.impactar());
+        this.physics.add.collider(this.balasJefe, this.nivel, bala => {
+            sonar(this, 'bola-impacto', { x: bala.x });
+            bala.impactar();
+        });
         this.physics.add.overlap(this.player, this.balasJefe, (jugador, bala) => {
             if (!bala.active || this.dash) return;
+            sonar(this, 'bola-impacto', { x: bala.x });
             this.danarJugador(bala.danio, bala.x);
             bala.impactar();
         });
@@ -490,6 +510,7 @@ export default class GameScene extends Phaser.Scene {
         this.tweens.add({ targets: celda, alpha: 0.3, duration: 70, yoyo: true, repeat: 2 });
         this.tweens.killTweensOf(celula);
         celula.destroy();
+        sonar(this, 'celula-recoger');
     }
 
     crearHud() {
@@ -529,6 +550,7 @@ export default class GameScene extends Phaser.Scene {
 
     equiparArma(id) {
         if (!this.armas.includes(id) || id === this.armaId || this.carga) return;
+        if (this.armaId) sonar(this, 'cambiar-arma');   // no al equipar la inicial
         this.armaId = id;
         this.arma = ARMAS[id];
         this.tajo = null;
@@ -602,6 +624,7 @@ export default class GameScene extends Phaser.Scene {
             this.morirJugador();
             return;
         }
+        sonar(this, caida ? 'jugador-caida' : 'jugador-golpe');
 
         // Empujón alejándose del atacante
         if (!caida) {
@@ -625,6 +648,7 @@ export default class GameScene extends Phaser.Scene {
     morirJugador() {
         if (this.muerto) return;
         this.muerto = true;
+        sonar(this, 'jugador-morir');
         this.cancelarCarga();
         this.terminarDash();
         this.vida = 0;
@@ -753,6 +777,7 @@ export default class GameScene extends Phaser.Scene {
         if (!bala) return false;   // pool agotado
         bala.disparar(x, y, direccion, ataque);
         if (ataque.sprite) return true;   // los proyectiles con sprite propio no llevan fogonazo de pistola
+        sonar(this, 'pistola-disparo');
 
         const destello = this.add.image(x + 3 * direccion.x, y + 3 * direccion.y, 'proyectil', FRAME_DESTELLO)
             .setRotation(Math.atan2(direccion.y, direccion.x)).setDepth(11);
@@ -800,6 +825,7 @@ export default class GameScene extends Phaser.Scene {
         const alcance = this.alcanceLibre(x, y, direccion, ataque.alcance);
         this.danarFranja(x, y, direccion, alcance, ataque.ancho, ataque.danio);
         this.efectoDireccional(ataque.efecto, x, y, direccion, alcance, ataque.alcance);
+        sonar(this, 'pistola-estallido');
         this.cameras.main.shake(80, 0.006);
         return true;
     }
@@ -809,6 +835,7 @@ export default class GameScene extends Phaser.Scene {
         const alcance = this.alcanceLibre(x, y, direccion, ataque.alcance);
         this.danarFranja(x, y, direccion, alcance, ataque.ancho, ataque.danio);
         const fx = this.efectoDireccional(ataque.efecto, x, y, direccion, alcance, ataque.alcance);
+        sonar(this, 'espada-tajo');
         // Mirando a la izquierda la estela se refleja para que barra de arriba abajo, igual que el arma
         if (direccion.x < 0) fx.setFlipY(true);
         // Ángulo del tajo respecto a la horizontal hacia donde mira (negativo = hacia arriba)
@@ -845,6 +872,7 @@ export default class GameScene extends Phaser.Scene {
     lanzarCargado(ataque, time) {
         const { x, y, direccion } = this.origenDisparo(true);
         this.lanzarProyectil(ataque.proyectil, x + 6 * direccion.x, y, direccion);
+        sonar(this, 'espada-onda');
         this.listoEn.especial = time + ataque.enfriamiento;
         this.especialAvisado = false;
         this.tajo = { inicio: time, duracion: 150 };   // el arma baja de golpe al lanzar
@@ -857,6 +885,7 @@ export default class GameScene extends Phaser.Scene {
         // fin: límite de seguridad (el doble de la duración) por si con pocos FPS no llega a recorrer la distancia
         this.dash = { direccion, desde: this.player.x, fin: time + duracion * 2, estela: 0 };
         if (enAire) this.dashEnAire = true;
+        sonar(this, 'jugador-dash');
         this.player.flipX = direccion < 0;
         this.player.body.setAllowGravity(false);
         this.player.setVelocity(direccion * distancia / duracion * 1000, 0);
@@ -993,6 +1022,7 @@ export default class GameScene extends Phaser.Scene {
         const JustDown = Phaser.Input.Keyboard.JustDown;
         if (JustDown(space) && enSuelo) {
             this.player.setVelocityY(SALTO);
+            sonar(this, 'jugador-salto');
         }
 
         // Abajo (↓/S) sobre una rejilla: dejarse caer a través de ella

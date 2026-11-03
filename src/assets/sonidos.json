@@ -1,0 +1,313 @@
+{
+  "pistola-disparo": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/pistola-disparo-0.wav",
+      "assets/sonidos/pistola-disparo-1.wav",
+      "assets/sonidos/pistola-disparo-2.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.5,
+    "duracion": 0.8
+  },
+  "bola-impacto": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/bola-impacto.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.35,
+    "duracion": 0.7
+  },
+  "cambiar-arma": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/cambiar-arma.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.35,
+    "duracion": 0.37
+  },
+  "celula-recoger": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/celula-recoger.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.4,
+    "duracion": 1.5
+  },
+  "compuerta-cerrar": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/compuerta-cerrar.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.85,
+    "duracion": 5.25
+  },
+  "cuchillero-ataque": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/cuchillero-ataque.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.5,
+    "duracion": 1.12
+  },
+  "cuchillero-morir": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/cuchillero-morir.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.55,
+    "duracion": 1.43
+  },
+  "espada-onda": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/espada-onda.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.6,
+    "duracion": 1.9
+  },
+  "espada-tajo": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/espada-tajo-0.wav",
+      "assets/sonidos/espada-tajo-1.wav",
+      "assets/sonidos/espada-tajo-2.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.45,
+    "duracion": 0.92
+  },
+  "impacto-metal": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/impacto-metal-0.wav",
+      "assets/sonidos/impacto-metal-1.wav",
+      "assets/sonidos/impacto-metal-2.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.42,
+    "duracion": 0.8
+  },
+  "impacto-muro": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/impacto-muro-0.wav",
+      "assets/sonidos/impacto-muro-1.wav",
+      "assets/sonidos/impacto-muro-2.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.28,
+    "duracion": 0.7
+  },
+  "jefe-aterrizar": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/jefe-aterrizar.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.85,
+    "duracion": 5
+  },
+  "jefe-carga": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/jefe-carga.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.6,
+    "duracion": 1.5
+  },
+  "jefe-descarga": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/jefe-descarga.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.85,
+    "duracion": 3.5
+  },
+  "jefe-disparo": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/jefe-disparo-0.wav",
+      "assets/sonidos/jefe-disparo-1.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.4,
+    "duracion": 1
+  },
+  "jefe-golpe": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/jefe-golpe-0.wav",
+      "assets/sonidos/jefe-golpe-1.wav",
+      "assets/sonidos/jefe-golpe-2.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.38,
+    "duracion": 1.1
+  },
+  "jefe-morir": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/jefe-morir.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.9,
+    "duracion": 5.6
+  },
+  "jefe-rayo-aviso": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/jefe-rayo-aviso.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.32,
+    "duracion": 0.7
+  },
+  "jefe-rayo": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/jefe-rayo.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.55,
+    "duracion": 1
+  },
+  "jefe-rugido": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/jefe-rugido.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.8,
+    "duracion": 3.6
+  },
+  "jefe-zarpazo": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/jefe-zarpazo.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.65,
+    "duracion": 1.92
+  },
+  "jugador-caida": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/jugador-caida.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.6,
+    "duracion": 1.6
+  },
+  "jugador-dash": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/jugador-dash.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.4,
+    "duracion": 0.3
+  },
+  "jugador-golpe": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/jugador-golpe-0.wav",
+      "assets/sonidos/jugador-golpe-1.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.5,
+    "duracion": 0.65
+  },
+  "jugador-morir": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/jugador-morir.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.6,
+    "duracion": 2.8
+  },
+  "jugador-salto": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/jugador-salto.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.18,
+    "duracion": 0.12
+  },
+  "pistola-estallido": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/pistola-estallido.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.7,
+    "duracion": 3.9
+  },
+  "puerta-golpe": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/puerta-golpe-0.wav",
+      "assets/sonidos/puerta-golpe-1.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.5,
+    "duracion": 2
+  },
+  "puerta-rota": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/puerta-rota.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.8,
+    "duracion": 3
+  },
+  "rastreador-morir": {
+    "tipo": "efecto",
+    "archivos": [
+      "assets/sonidos/rastreador-morir-0.wav",
+      "assets/sonidos/rastreador-morir-1.wav"
+    ],
+    "bucle": false,
+    "volumen": 0.5,
+    "duracion": 1.16
+  },
+  "ambiente-pasillo": {
+    "tipo": "ambiente",
+    "archivos": [
+      "assets/sonidos/ambiente-pasillo.wav"
+    ],
+    "bucle": true,
+    "volumen": 0.45,
+    "duracion": 40
+  },
+  "musica-ambiente": {
+    "tipo": "musica",
+    "archivos": [
+      "assets/sonidos/musica-ambiente.wav"
+    ],
+    "bucle": true,
+    "volumen": 1,
+    "duracion": 64
+  },
+  "musica-jefe": {
+    "tipo": "musica",
+    "archivos": [
+      "assets/sonidos/musica-jefe.wav"
+    ],
+    "bucle": true,
+    "volumen": 1,
+    "duracion": 32
+  }
+}

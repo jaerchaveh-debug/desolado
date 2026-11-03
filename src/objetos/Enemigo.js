@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { ENEMIGOS } from '../config/combate';
+import { sonar } from '../sistema/sonido';
 
 const CAIDA_MAXIMA = 48;   // px que un enemigo de suelo se deja caer (3 tiles); más es un foso
 const ALTURA_ATAQUE = 20;  // px de diferencia vertical máxima con el objetivo para atacarle
@@ -83,6 +84,7 @@ export default class Enemigo extends Phaser.Physics.Arcade.Sprite {
         this.vida -= cantidad;
         if (this.vida <= 0) this.morir();
         else {
+            this.efectoSonoro('golpe');
             // Destello al recibir daño sin morir (Phaser 4: setTintFill ya no existe)
             this.setTint(this.datos.colorGolpe).setTintMode(Phaser.TintModes.FILL);
             this.scene.time.delayedCall(80, () => this.clearTint());
@@ -95,8 +97,15 @@ export default class Enemigo extends Phaser.Physics.Arcade.Sprite {
         return dx > -4 && dx < distancia && Math.abs(this.objetivo.y - this.y) < ALTURA_ATAQUE;
     }
 
+    // Sonido de 'datos.sonidos' (golpe, ataque, morir), situado en su posición
+    efectoSonoro(momento) {
+        const nombre = this.datos.sonidos?.[momento];
+        if (nombre) sonar(this.scene, nombre, { x: this.x });
+    }
+
     atacar() {
         this.atacando = true;
+        this.efectoSonoro('ataque');
         this.setVelocityX(0);
         this.anims.resume();
         this.play(`${this.datos.sprite}-atacar`);
@@ -128,6 +137,7 @@ export default class Enemigo extends Phaser.Physics.Arcade.Sprite {
     morir() {
         this.vivo = false;
         this.atacando = false;
+        this.efectoSonoro('morir');
         this.scene.events.emit(EVENTO_ELIMINADO, this.tipo, this);
         this.body.enable = false;
         this.anims.resume();

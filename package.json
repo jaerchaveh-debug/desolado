@@ -8,7 +8,11 @@
     "build": "vite build",
     "preview": "vite preview",
     "arte": "node tools/pixel/generar.js",
-    "arte:revisar": "node tools/pixel/revisar.js"
+    "arte:revisar": "node tools/pixel/revisar.js",
+    "arte:ver": "node tools/pixel/ver.js",
+    "arte:texto": "node tools/pixel/texto.js",
+    "sonido": "node tools/sonido/generar.js",
+    "sonido:revisar": "node tools/sonido/revisar.js"
   },
   "devDependencies": {
     "vite": "^8.1.0"

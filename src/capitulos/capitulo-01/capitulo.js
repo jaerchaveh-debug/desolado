@@ -32,6 +32,11 @@ export default {
         ambiente: 'audio/capitulo-01/ambiente.ogg',
         jefe: 'audio/capitulo-01/jefe.mp3'
     },
+    // Alternativas generadas para comparar: abrir el juego con ?musica=generada usa sonido/musica-ambiente.js
+    // y sonido/musica-jefe.js en lugar de las pistas de arriba.
+
+    // Ambiente industrial en bucle bajo la música (nombre de sonido/*.js, tipo 'ambiente')
+    ambiente: 'ambiente-pasillo',
 
     // Jefe de la sala final (objeto "jefe" del mapa; tipo de JEFES en src/config/combate.js).
     // Aparece 'retardo' ms después de cerrarse la compuerta. Durante el combate aparecen refuerzos cada
