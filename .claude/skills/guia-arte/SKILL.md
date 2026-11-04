@@ -25,7 +25,8 @@ Fuente de verdad: [tools/pixel/paleta.js](../../../tools/pixel/paleta.js). **Pro
 | `a`–`d` | óxido | suciedad, metal viejo, tela, detalles cálidos |
 | `e`–`h` | cian | luz, energía, visores, pantallas |
 | `i`–`j` | rojo | alerta, enemigos, daño (muy escaso) |
-| `k`–`l` | piel | rostros/manos visibles (poco frecuente) |
+| `k`–`l`, `u` | piel (`u`: pálida) | rostros/manos visibles (poco frecuente) |
+| `m`–`p`, `q`–`t` | rosa ceniza, lavanda | **solo ilustraciones** (retratos, iconos, portadas, fichas): skill `ilustracion` |
 | `.` | transparente | |
 
 ## Tamaños y rejilla
@@ -47,6 +48,8 @@ Fuente de verdad: [tools/pixel/paleta.js](../../../tools/pixel/paleta.js). **Pro
 - Animación: 2 frames para respirar (2 fps), 4–6 para correr (8–12 fps). Rebote vertical de 1 px.
 
 ## Personajes
+
+> Retratos, iconos, portadas de capítulo y fichas de enemigos siguen además la skill `ilustracion` (dark anime fantasy entintado, tecno-gótico).
 
 - Siluetas legibles a 16x32: una forma dominante (abrigo, capucha, casco) y **un** punto de luz que guía la mirada (visor, ojo, núcleo).
 - Rostros ocultos o mínimos (visores, máscaras, sombra de capucha).

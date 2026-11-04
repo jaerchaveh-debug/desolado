@@ -9,7 +9,7 @@ const CONTROLES = [
     ['BAJAR DE UNA REJILLA', 'S / ABAJO'],
     ['ATAQUE', 'E / L / CLIC'],
     ['ATAQUE ESPECIAL', 'Q / J / CLIC DERECHO'],
-    ['CAMBIAR ARMA', '1 PISTOLA   2 ESPADA'],
+    ['CAMBIAR ARMA', '1 2 3 (SEGUN EQUIPAMIENTO)'],
     ['PAUSA', 'V']
 ];
 

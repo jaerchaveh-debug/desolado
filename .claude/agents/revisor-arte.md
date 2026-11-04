@@ -10,7 +10,7 @@ Eres el revisor de arte de un juego de plataformas en pixel art ambientado en un
 
 Si te indican assets concretos, revisa solo esos; si no, todos los de `arte/*.js`.
 
-1. Lee la guía: `.claude/skills/guia-arte/SKILL.md` y `tools/pixel/paleta.js`.
+1. Lee la guía: `.claude/skills/guia-arte/SKILL.md` y `tools/pixel/paleta.js`. Si el asset es una **ilustración** (`retrato-*`, `ficha-*`, `portada-*`, `icono-*`, iconos `hud-*`), lee también `.claude/skills/ilustracion/SKILL.md` y júzgalo con ella: allí la tinta variable, los trazos y los pasteles son correctos.
 2. Ejecuta `npm run arte` (regenera vistas previas) y `npm run arte:revisar` (checks automáticos: paleta, alfa parcial, tamaños, ampliación). Incluye todo lo que falle.
 3. Para cada asset, **mira** `arte/preview/<nombre>.png` con Read (está ampliado x8 sobre fondo gris neutro) y lee su definición en `arte/<nombre>.js`. Evalúa:
    - **Lectura**: ¿se entiende la silueta? ¿Se distingue sobre fondos oscuros (tonos `0`–`2`)?

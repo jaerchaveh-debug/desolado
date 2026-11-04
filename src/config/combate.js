@@ -51,6 +51,9 @@ export const PUERTA = {
 export const ARMAS = {
     pistola: {
         nombre: 'PISTOLA',
+        // Pantalla de equipamiento: icono del inventario y qué hace cada ataque
+        icono: 'icono-pistola',
+        descripcion: { ataque: 'DISPARO DE ENERGÍA', especial: 'ESTALLIDO QUE ARRASA UNA FRANJA' },
         pose: 'pistola',
         ataque: {
             tipo: 'proyectil',
@@ -71,6 +74,8 @@ export const ARMAS = {
     },
     espada: {
         nombre: 'ESPADA',
+        icono: 'icono-espada',
+        descripcion: { ataque: 'TAJO CUERPO A CUERPO', especial: 'ONDA QUE ATRAVIESA A LOS ENEMIGOS' },
         pose: 'mano',
         sprite: 'espada',
         ataque: {
@@ -103,7 +108,10 @@ export const ARMAS = {
 };
 
 // Armas con las que empieza el jugador, en el orden de las teclas 1, 2...; la primera es la equipada
+// Armas que tiene el jugador desde el principio (las obtenidas, por ahora) y su orden por
+// defecto en los espacios de equipamiento (teclas 1, 2, 3)
 export const ARMAS_INICIALES = ['pistola', 'espada'];
+export const ESPACIOS_ARMAS = 3;
 
 // movimiento: 'volar' (ignora gravedad y tiles) o 'suelo' (gravedad, choca con tiles, no salta al vacío)
 // puntos: nombre de los puntos de aparición del mapa (capa "objetos") que usa este tipo

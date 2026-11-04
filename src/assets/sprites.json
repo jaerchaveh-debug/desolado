@@ -137,11 +137,11 @@
     "archivo": "assets/sprites/fuente.png",
     "ancho": 6,
     "alto": 8,
-    "frames": 46,
+    "frames": 86,
     "tipo": "fuente",
     "animaciones": {},
     "propiedades": {},
-    "caracteres": "0123456789 ABCDEFGHIJKLMNÑOPQRSTUVWXYZ.,:!?-/>"
+    "caracteres": "0123456789 ABCDEFGHIJKLMNÑOPQRSTUVWXYZ.,:!?-/>ÁÉÍÓÚ¡¿abcdefghijklmnñopqrstuvwxyzáéíóúü"
   },
   "robot-cuchillas": {
     "archivo": "assets/sprites/robot-cuchillas.png",
@@ -502,6 +502,65 @@
           2
         ],
         "fps": 3,
+        "repetir": -1
+      }
+    },
+    "propiedades": {}
+  },
+  "retrato-jugador": {
+    "archivo": "assets/sprites/retrato-jugador.png",
+    "ancho": 64,
+    "alto": 64,
+    "frames": 4,
+    "tipo": "sprite",
+    "animaciones": {},
+    "propiedades": {}
+  },
+  "icono-pistola": {
+    "archivo": "assets/sprites/icono-pistola.png",
+    "ancho": 32,
+    "alto": 32,
+    "frames": 1,
+    "tipo": "sprite",
+    "animaciones": {},
+    "propiedades": {}
+  },
+  "icono-espada": {
+    "archivo": "assets/sprites/icono-espada.png",
+    "ancho": 32,
+    "alto": 32,
+    "frames": 1,
+    "tipo": "sprite",
+    "animaciones": {},
+    "propiedades": {}
+  },
+  "figura-jugador": {
+    "archivo": "assets/sprites/figura-jugador.png",
+    "ancho": 80,
+    "alto": 128,
+    "frames": 16,
+    "tipo": "sprite",
+    "animaciones": {
+      "quieto": {
+        "frames": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "fps": 8,
         "repetir": -1
       }
     },

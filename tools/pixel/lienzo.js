@@ -236,6 +236,51 @@ export class Lienzo {
         return this;
     }
 
+    // Tinta de grosor variable (ilustraciones): contorno de 1 px y un segundo píxel
+    // en los lados de sombra (`lados`: 'abajo', 'derecha', 'izquierda', 'arriba'),
+    // como el trazo de pincel que engorda lejos de la luz. `irregular` (0-1) es la
+    // proporción de píxeles del refuerzo que se saltan con ruido, para que la
+    // línea no quede mecánica. Aplicar al final, sobre la figura completa.
+    entintar(c, { lados = ['abajo'], irregular = 0.2, semilla = 0 } = {}) {
+        const opaco = new Set();
+        this.px.forEach((fila, y) => fila.forEach((p, x) => { if (p !== TRANSPARENTE) opaco.add(`${x},${y}`); }));
+        const original = (x, y) => opaco.has(`${x},${y}`);
+        this.contorno(c);
+        const dir = { abajo: [0, 1], arriba: [0, -1], derecha: [1, 0], izquierda: [-1, 0] };
+        const marcar = [];
+        for (const lado of lados) {
+            const [dx, dy] = dir[lado];
+            for (let y = 0; y < this.alto; y++) {
+                for (let x = 0; x < this.ancho; x++) {
+                    if (this.color(x, y) !== TRANSPARENTE) continue;
+                    // El vecino hacia la figura es contorno y el siguiente, figura original
+                    if (this.color(x - dx, y - dy) !== c || original(x - dx, y - dy)) continue;
+                    if (!original(x - 2 * dx, y - 2 * dy)) continue;
+                    if (ruido(x, y, semilla) < irregular) continue;
+                    marcar.push([x, y]);
+                }
+            }
+        }
+        marcar.forEach(([x, y]) => this.px_(x, y, c));
+        return this;
+    }
+
+    // Sombreado con trazos (hatching): líneas paralelas de color c cada `separacion`
+    // px sobre los píxeles opacos de la zona. `inclinacion` 1 = '/', -1 = '\',
+    // 0 = verticales. `rotura` (0-1) corta las líneas con ruido como un trazo a mano.
+    // Usar solo en la zona de sombra y con un color 1-2 tonos más oscuro que la base.
+    trazos(zona, c, { separacion = 3, inclinacion = 1, rotura = 0.15, semilla = 0 } = {}) {
+        const prueba = aPrueba(zona);
+        this.px.forEach((fila, y) => fila.forEach((p, x) => {
+            if (p === TRANSPARENTE || !prueba(x, y)) return;
+            const linea = inclinacion === 0 ? x : x + inclinacion * y;
+            if (((linea % separacion) + separacion) % separacion !== 0) return;
+            if (ruido(x, y, semilla) < rotura) return;
+            this.px_(x, y, c);
+        }));
+        return this;
+    }
+
     // Copias y variantes ---------------------------------------------------------
 
     copia() {

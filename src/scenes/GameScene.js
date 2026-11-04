@@ -1,8 +1,8 @@
 import Phaser from 'phaser';
 import sprites from '../assets/sprites.json';
-import { JUGADOR, ARMAS, ARMAS_INICIALES, ENEMIGOS, JEFES, CURACION } from '../config/combate';
+import { JUGADOR, ARMAS, ENEMIGOS, JEFES, CURACION } from '../config/combate';
 import { buscarCapitulo, claveNivel } from '../capitulos';
-import { completarCapitulo } from '../sistema/progreso';
+import { completarCapitulo, equipamiento } from '../sistema/progreso';
 import { sonar, claveSonido, datosSonido, pistaMusica } from '../sistema/sonido';
 import Enemigo, { EVENTO_ELIMINADO } from '../objetos/Enemigo';
 import Proyectil from '../objetos/Proyectil';
@@ -62,6 +62,8 @@ const ESPERA_VICTORIA = 3000;
 // Punto de control: px a la izquierda de la terminal donde reaparece el jugador, y cuánto se ve el aviso
 const REAPARICION_CONTROL = 20;
 const AVISO_CONTROL = 2200;
+// ms tras abrirse la compuerta de una emboscada hasta su diálogo de salida (la compuerta tarda 900 en subir)
+const ESPERA_DIALOGO_COMPUERTA = 1000;
 // Emboscadas: px mínimos entre el jugador y un punto de aparición
 const DISTANCIA_EMBOSCADA = 48;
 const FRAME_VIDA_LLENA = 0;
@@ -154,10 +156,10 @@ export default class GameScene extends Phaser.Scene {
         this.crearHud();
 
         // A/D o ←/→ mueven · W/↑ apunta arriba · S/↓ baja de una rejilla · espacio salta · Shift: dash
-        // E/L o clic izquierdo: ataque del arma equipada · Q/J o clic derecho: ataque especial · 1, 2... cambian de arma
+        // E/L o clic izquierdo: ataque del arma equipada · Q/J o clic derecho: ataque especial · 1, 2, 3 cambian de arma
         this.cursors = this.input.keyboard.createCursorKeys();
         this.wasd = this.input.keyboard.addKeys('W,A,S,D');
-        this.teclas = this.input.keyboard.addKeys('E,L,Q,J,ONE,TWO,SHIFT');
+        this.teclas = this.input.keyboard.addKeys('E,L,Q,J,ONE,TWO,THREE,SHIFT');
 
         // Ratón: el clic derecho no abre el menú del navegador; se recuerda hasta el siguiente update (como un JustDown)
         this.input.mouse.disableContextMenu();
@@ -304,14 +306,15 @@ export default class GameScene extends Phaser.Scene {
     }
 
     crearCombate(mapa) {
-        // Armas que lleva el jugador (teclas 1, 2...); la equipada es this.arma (con su 'ataque' y su 'especial')
-        this.armas = [...ARMAS_INICIALES];
+        // Espacios de armas de la pantalla de equipamiento (teclas 1, 2, 3; null = vacío);
+        // la equipada es this.arma (con su 'ataque' y su 'especial')
+        this.armas = equipamiento();
         // Momento en que cada ataque de cada arma vuelve a estar disponible (se conserva al cambiar de arma)
-        this.enfriamientos = Object.fromEntries(this.armas.map(id => [id, { ataque: 0, especial: 0 }]));
+        this.enfriamientos = Object.fromEntries(this.armas.filter(Boolean).map(id => [id, { ataque: 0, especial: 0 }]));
         this.carga = null;            // ataque especial cargándose (espada)
         this.tajo = null;             // giro del arma durante un tajo
         this.armaEnMano = this.add.sprite(0, 0, 'espada').setDepth(11).setVisible(false);
-        this.equiparArma(this.armas[0]);
+        this.equiparArma(this.armas.find(Boolean));   // la del primer espacio ocupado
         this.especialAvisado = true;  // empieza cargado: sin destello inicial
 
         this.balas = this.physics.add.group({ classType: Proyectil, maxSize: 20, allowGravity: false });
@@ -424,7 +427,10 @@ export default class GameScene extends Phaser.Scene {
         if (this.emboscada || !this.player.body.blocked.down) return;
         const e = this.emboscadas.find(e => !e.hecha && e.zona.contains(this.player.x, this.player.body.bottom)
             && this.player.body.bottom >= e.zona.bottom - 2);
-        if (e) this.empezarEmboscada(e);
+        if (!e) return;
+        // Primero el diálogo de llegada (si lo hay); la alarma salta al cerrarlo
+        e.hecha = true;
+        this.dialogo(e.datos.dialogos?.inicio, () => this.empezarEmboscada(e));
     }
 
     empezarEmboscada(e) {
@@ -441,22 +447,71 @@ export default class GameScene extends Phaser.Scene {
         this.tweens.add({ targets: aviso, alpha: 0.2, duration: 180, yoyo: true, repeat: 5, onComplete: () => aviso.destroy() });
         this.time.delayedCall(e.datos.retardo, () => {
             if (this.muerto) return;
-            const creados = this.aparecerGrupo(e.datos.enemigos, e.zona);
-            creados.forEach(enemigo => { enemigo.emboscada = true; });
-            e.restantes = creados.length;
-            if (!e.restantes) this.terminarEmboscada();
+            e.restantes = 0;
+            this.sumarAEmboscada(e, this.aparecerGrupo(e.datos.enemigos, e.zona));
+            this.refuerzosEmboscada(e);
+            this.comprobarFinEmboscada(e);
+        });
+    }
+
+    sumarAEmboscada(e, creados) {
+        creados.forEach(enemigo => { enemigo.emboscada = true; });
+        e.restantes += creados.length;
+    }
+
+    // Refuerzos (datos.refuerzos): durante `duracion` ms, cada segundo llegan entre porSegundo[0]
+    // y porSegundo[1] enemigos repartidos a lo largo de ese segundo, de un tipo al azar según
+    // el peso de `tipos`. Sin límite de vivos. La emboscada no termina mientras duran.
+    refuerzosEmboscada(e) {
+        const r = e.datos.refuerzos;
+        if (!r) return;
+        e.refuerzando = true;
+        const segundos = Math.ceil(r.duracion / 1000);
+        const tipos = Object.entries(r.tipos).flatMap(([tipo, peso]) => Array(peso).fill(tipo));
+        for (let s = 0; s < segundos; s++) {
+            const n = Phaser.Math.Between(r.porSegundo[0], r.porSegundo[1]);
+            for (let i = 0; i < n; i++) {
+                this.time.delayedCall(s * 1000 + Math.round(i * 1000 / n), () => {
+                    if (this.muerto || this.emboscada !== e) return;
+                    this.sumarAEmboscada(e, this.aparecerGrupo({ [Phaser.Utils.Array.GetRandom(tipos)]: 1 }, e.zona));
+                });
+            }
+        }
+        // Al acabar los refuerzos, si ya no queda nadie, se abre la compuerta
+        this.time.delayedCall(segundos * 1000, () => {
+            e.refuerzando = false;
+            if (this.emboscada === e) this.comprobarFinEmboscada(e);
         });
     }
 
     contarEmboscada(enemigo) {
         if (!this.emboscada || !enemigo?.emboscada) return;
-        if (--this.emboscada.restantes <= 0) this.terminarEmboscada();
+        this.emboscada.restantes--;
+        this.comprobarFinEmboscada(this.emboscada);
+    }
+
+    comprobarFinEmboscada(e) {
+        if (e.restantes <= 0 && !e.refuerzando) this.terminarEmboscada();
     }
 
     // Todos eliminados: se abre la compuerta y vuelven las apariciones normales
     terminarEmboscada() {
-        this.emboscada.compuerta?.abrir();
+        const e = this.emboscada;
+        e.compuerta?.abrir();
         this.emboscada = null;
+        // Diálogo de salida cuando la compuerta ha terminado de subir
+        this.time.delayedCall(ESPERA_DIALOGO_COMPUERTA, () => this.dialogo(e.datos.dialogos?.fin));
+    }
+
+    // Diálogo con retratos (DialogoScene) encima del juego congelado. Sin líneas, o con el
+    // jugador muerto, no se muestra; alTerminar se llama igualmente al cerrarlo.
+    dialogo(lineas, alTerminar) {
+        if (!lineas?.length || this.muerto) {
+            alTerminar?.();
+            return;
+        }
+        this.scene.launch('DialogoScene', { lineas, alTerminar });
+        this.scene.pause();
     }
 
     // Terminal del punto de control (objeto "control"): al pasar por delante se activa y, desde entonces,
@@ -682,7 +737,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     equiparArma(id) {
-        if (!this.armas.includes(id) || id === this.armaId || this.carga) return;
+        if (!id || !this.armas.includes(id) || id === this.armaId || this.carga) return;   // espacio vacío: nada
         if (this.armaId) sonar(this, 'cambiar-arma');   // no al equipar la inicial
         this.armaId = id;
         this.arma = ARMAS[id];
@@ -1175,9 +1230,8 @@ export default class GameScene extends Phaser.Scene {
             if (bajo?.collideUp && !bajo.collideDown) this.atravesarHasta = time + ATRAVESAR;
         }
 
-        const { E, L, Q, J, ONE, TWO } = this.teclas;
-        if (JustDown(ONE)) this.equiparArma(this.armas[0]);
-        if (JustDown(TWO)) this.equiparArma(this.armas[1]);
+        const { E, L, Q, J, ONE, TWO, THREE } = this.teclas;
+        [ONE, TWO, THREE].forEach((tecla, i) => { if (JustDown(tecla)) this.equiparArma(this.armas[i]); });
         // Con el ratón, el ataque sale hacia el cursor: el jugador se gira hacia ese lado y el brazo toma
         // la pose más cercana. Con el teclado se apunta con W/A/D.
         const puntero = this.input.activePointer;

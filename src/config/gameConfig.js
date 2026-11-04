@@ -6,10 +6,12 @@ import FondoMenuScene from '../scenes/FondoMenuScene';
 import MenuScene from '../scenes/MenuScene';
 import CapitulosScene from '../scenes/CapitulosScene';
 import ControlesScene from '../scenes/ControlesScene';
+import EquipamientoScene from '../scenes/EquipamientoScene';
 import GameScene from '../scenes/GameScene';
 import GameOverScene from '../scenes/GameOverScene';
 import PauseScene from '../scenes/PauseScene';
 import CapituloCompletadoScene from '../scenes/CapituloCompletadoScene';
+import DialogoScene from '../scenes/DialogoScene';
 
 export default {
 
@@ -49,9 +51,11 @@ export default {
         MenuScene,
         CapitulosScene,
         ControlesScene,
+        EquipamientoScene,
         GameScene,
         GameOverScene,
         PauseScene,
-        CapituloCompletadoScene
+        CapituloCompletadoScene,
+        DialogoScene
     ]
 }

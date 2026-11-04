@@ -4,7 +4,7 @@ import { capituloParaContinuar } from '../sistema/progreso';
 
 export const TITULO_JUEGO = 'DESOLADO';
 
-// Menú de inicio: Continuar, Capítulos y Controles.
+// Menú de inicio: Continuar, Equipamiento, Capítulos y Controles.
 export default class MenuScene extends MenuBase {
 
     constructor() {
@@ -21,11 +21,12 @@ export default class MenuScene extends MenuBase {
             y: 144,
             opciones: [
                 { texto: 'CONTINUAR', accion: () => this.jugar(continuar) },
+                { texto: 'EQUIPAMIENTO', accion: () => this.irA('EquipamientoScene') },
                 { texto: 'CAPITULOS', accion: () => this.irA('CapitulosScene') },
                 { texto: 'CONTROLES', accion: () => this.irA('ControlesScene') }
             ]
         });
-        this.texto(this.cx, 204, `CAPITULO ${continuar.numero} - ${continuar.titulo}`, COLORES.GRIS_OSCURO);
+        this.texto(this.cx, 214, `CAPITULO ${continuar.numero} - ${continuar.titulo}`, COLORES.GRIS_OSCURO);
         this.pie('W/S ELEGIR   ENTER/E ACEPTAR');
 
         // Interferencia ocasional en el título

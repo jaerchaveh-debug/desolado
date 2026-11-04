@@ -31,9 +31,24 @@ export const PALETA = {
     'i': '#5a1418',
     'j': '#b3262a',
 
-    // Piel
+    // Piel (u: piel pálida de las ilustraciones)
     'k': '#c9a48f',
-    'l': '#8a6a5c'
+    'l': '#8a6a5c',
+    'u': '#ecd8cc',
+
+    // Pastel apagado: solo personajes de las ilustraciones (skill `ilustracion`),
+    // nunca en estructura, tiles ni fondos.
+    // Rosa ceniza: pelo, tela, mejillas, labios
+    'm': '#3b2731',
+    'n': '#6b4556',
+    'o': '#a3788a',
+    'p': '#dcb7c3',
+
+    // Lavanda: pelo, tela, iris, reflejos fríos
+    'q': '#2b2940',
+    'r': '#4d4a70',
+    's': '#8580ad',
+    't': '#c3c0e0'
 };
 
 export const TRANSPARENTE = '.';
@@ -45,7 +60,9 @@ export const RAMPAS = [
     'abcd',         // óxido
     'efgh',         // cian
     'ij',           // rojo
-    'lk'            // piel
+    'lku',          // piel
+    'mnop',         // rosa ceniza
+    'qrst'          // lavanda
 ];
 
 // Color a `pasos` de distancia dentro de su rampa (negativo = más oscuro)

@@ -43,7 +43,16 @@ export default {
             zona: 'emboscada',
             compuerta: 'compuerta-emboscada',
             retardo: 800,
-            enemigos: { rastreador: 8, cuchillero: 4 }
+            enemigos: { rastreador: 8, cuchillero: 4 },
+            // Refuerzos desde que aparece el grupo: 'duracion' ms, entre porSegundo[0] y [1]
+            // enemigos por segundo, de un tipo al azar según su peso (2 rastreadores por cada cuchillero)
+            refuerzos: { duracion: 7000, porSegundo: [2, 3], tipos: { rastreador: 2, cuchillero: 1 } },
+            // Diálogos (DialogoScene): 'inicio' al tocar el fondo, antes de la alarma;
+            // 'fin' cuando la compuerta termina de subir
+            dialogos: {
+                inicio: [{ quien: 'errante', expresion: 'sorpresa', texto: '!!! ....!', sobresalto: true }],
+                fin: [{ quien: 'errante', expresion: 'neutro', texto: 'La puerta esta abierta.' }]
+            }
         }
     ],
 
