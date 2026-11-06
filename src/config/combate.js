@@ -5,13 +5,13 @@
 export const JUGADOR = {
     vida: 12,
     invulnerabilidad: 1000, // ms sin recibir daño tras un golpe (el sprite parpadea)
-    retroceso: { x: 160, y: -180 },  // empujón al recibir daño, alejándolo del atacante
+    retroceso: { x: 320, y: -360 },  // empujón al recibir daño, alejándolo del atacante
     // Caída alta: aterrizar tras caer más de 'altura' px (desde el punto más alto en el aire) quita 'danio'.
     // Caer a un foso sin fondo sigue siendo muerte instantánea.
-    caida: { altura: 176, danio: 5 },
+    caida: { altura: 352, danio: 5 },
     // Dash (Shift): impulso horizontal sin gravedad, invulnerable mientras dura. Uno por salto en el aire.
     dash: {
-        distancia: 96,      // px
+        distancia: 192,     // px
         duracion: 150,      // ms que tarda en recorrerla
         enfriamiento: 800   // ms desde que termina hasta poder repetirlo
     }
@@ -58,15 +58,15 @@ export const ARMAS = {
         ataque: {
             tipo: 'proyectil',
             danio: 1,
-            velocidad: 300,
-            alcance: 480,
+            velocidad: 600,
+            alcance: 960,
             enfriamiento: 250
         },
         especial: {
             tipo: 'estallido',
             danio: 4,           // elimina de un golpe a rastreadores y cuchilleros
-            alcance: 192,       // se acorta si hay un muro; también el largo de arte/escopeta.js
-            ancho: 32,          // más que la bala del ataque normal
+            alcance: 384,       // se acorta si hay un muro; también el largo de arte/escopeta.js
+            ancho: 64,          // más que la bala del ataque normal
             enfriamiento: 6000,
             efecto: 'escopeta',
             icono: 'hud-escopeta'
@@ -81,8 +81,8 @@ export const ARMAS = {
         ataque: {
             tipo: 'tajo',
             danio: 2,
-            alcance: 80,        // algo menos que el especial de la pistola
-            ancho: 32,
+            alcance: 160,       // algo menos que el especial de la pistola
+            ancho: 64,
             enfriamiento: 400,
             duracion: 150,
             efecto: 'tajo-espada'
@@ -96,12 +96,12 @@ export const ARMAS = {
             icono: 'hud-espada',
             proyectil: {
                 danio: 8,
-                velocidad: 280,
-                alcance: 192,
+                velocidad: 560,
+                alcance: 384,
                 atraviesa: true,
                 sprite: 'onda-espada',
                 animacion: 'onda-espada-viajar',
-                cuerpo: { ancho: 10, alto: 28 }
+                cuerpo: { ancho: 20, alto: 56 }
             }
         }
     }
@@ -130,10 +130,10 @@ export const ENEMIGOS = {
         puntos: 'enemigo',
         vida: 1,            // la pistola (daño 1) le quita el 100 %
         danio: 1,           // daño al jugador por contacto
-        velocidad: 35,
+        velocidad: 70,
         colorGolpe: 0xe4eaf0,
         sonidos: { golpe: 'impacto-metal', morir: 'rastreador-morir' },
-        hitbox: { ancho: 14, alto: 16, x: 5, y: 1 }
+        hitbox: { ancho: 28, alto: 32, x: 10, y: 2 }
     },
     // Robot humanoide blanco a seis patas con brazos-cuchilla: patrulla el suelo hacia el jugador
     cuchillero: {
@@ -143,12 +143,12 @@ export const ENEMIGOS = {
         puntos: 'enemigo-suelo',
         vida: 2,            // dos disparos de pistola
         danio: 0,           // solo hace daño con el tajo de sus cuchillas
-        ataque: { alcance: 26, danio: 1, frameGolpe: 8, enfriamiento: 900 },
-        velocidad: 45,
+        ataque: { alcance: 28, danio: 1, frameGolpe: 8, enfriamiento: 900 },
+        velocidad: 90,
         colorGolpe: 0xb3262a,   // es blanco: el destello de golpe va en rojo para que se note
         sonidos: { golpe: 'impacto-metal', ataque: 'cuchillero-ataque', morir: 'cuchillero-morir' },
         // Cubre torso y cabeza para que la pistola (a la altura del pecho del jugador) le alcance
-        hitbox: { ancho: 22, alto: 21, x: 7, y: 3 }
+        hitbox: { ancho: 44, alto: 42, x: 14, y: 6 }
     }
 };
 
@@ -163,8 +163,8 @@ export const JEFES = {
         nombre: 'ESTIBADOR',
         sprite: 'jefe-estibador',
         vida: 100,
-        velocidad: 40,
-        salto: -400,            // sube pilas de dos cajas (64 px)
+        velocidad: 80,
+        salto: -800,            // sube pilas de dos cajas (128 px)
         colorGolpe: 0xe4eaf0,
         // Sonidos (sonido/*.js) de cada momento de su máquina de estados
         sonidos: {
@@ -172,24 +172,24 @@ export const JEFES = {
             carga: 'jefe-carga', descarga: 'jefe-descarga', disparo: 'jefe-disparo',
             rayoAviso: 'jefe-rayo-aviso', rayo: 'jefe-rayo', morir: 'jefe-morir'
         },
-        hitbox: { ancho: 24, alto: 58, x: 12, y: 5 },
-        ojos: { x: 3, y: -23 },
-        garra: { x: 22, y: -9 },
+        hitbox: { ancho: 48, alto: 116, x: 24, y: 12 },
+        ojos: { x: 6, y: -46 },
+        garra: { x: 44, y: -18 },
         // Distancia (px) a la que el jugador está "cerca": horizontal y vertical
-        cerca: { x: 72, y: 44 },
-        zarpazo: { alcance: 64, danio: 1, frameGolpe: 6, enfriamiento: 600 },
-        cargado: { cadaZarpazos: 3, carga: 1500, radio: 88, danio: 2 },   // radio: también el tamaño de arte/onda-jefe.js
+        cerca: { x: 64, y: 88 },
+        zarpazo: { alcance: 44, danio: 1, frameGolpe: 6, enfriamiento: 600 },
+        cargado: { cadaZarpazos: 3, carga: 1500, radio: 176, danio: 2 },   // radio: también el tamaño de arte/onda-jefe.js
         disparo: {
             cadencia: 700,      // ms entre bolas
             duracion: 4000,     // ms disparando antes de los rayos
             danio: 1,
-            velocidad: 200,     // algo más lenta que la bala de la pistola (300)
-            alcance: 480,
+            velocidad: 400,     // algo más lenta que la bala de la pistola (600)
+            alcance: 960,
             sprite: 'bola-energia',
             animacion: 'bola-energia-viajar',
-            cuerpo: { ancho: 6, alto: 6 }
+            cuerpo: { ancho: 12, alto: 12 }
         },
         // Cada rayo: 'aviso' ms de marca fina hacia donde estaba el jugador y luego 'duracion' ms de rayo que daña
-        rayo: { cantidad: 3, aviso: 700, duracion: 250, pausa: 300, danio: 2, ancho: 8, alcance: 640 }
+        rayo: { cantidad: 3, aviso: 700, duracion: 250, pausa: 300, danio: 2, ancho: 16, alcance: 1280 }
     }
 };

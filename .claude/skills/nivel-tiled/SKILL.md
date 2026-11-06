@@ -23,7 +23,7 @@ Antes de diseñar, carga `guia-arte` (composición, escala, verticalidad). Si ha
 ```jsonc
 {
   "type": "map", "orientation": "orthogonal", "renderorder": "right-down", "infinite": false,
-  "width": 30, "height": 17, "tilewidth": 16, "tileheight": 16,
+  "width": 30, "height": 17, "tilewidth": 32, "tileheight": 32,
   "tilesets": [ { "firstgid": 1, "name": "tiles-pasillo", "image": "../../sprites/tiles-pasillo.png", ... } ],
   "layers": [
     { "name": "plataformas", "type": "tilelayer", "width": 30, "height": 17, "data": [ /* width*height gids */ ] },
@@ -42,11 +42,11 @@ Antes de diseñar, carga `guia-arte` (composición, escala, verticalidad). Si ha
 - Lámparas del fondo: tiles con la propiedad `luz` (`cian`/`roja`) en el tileset; GameScene les pone encima un sprite `luz-fondo` que parpadea.
 - Caída mortal: caer más de 176 px (11 tiles) desde el punto más alto mata. Las bajadas "seguras" deben tener tramos de 4 filas como máximo (con el salto, ~124 px); un pozo en zigzag con plataformas cada 4 filas hace que fallar un salto sea mortal.
 - Objeto `inicio` obligatorio: punto (`point: true`) donde **apoyan los pies** del jugador.
-- Objetos `enemigo` (voladores) y `enemigo-suelo` (caminantes): puntos de aparición repartidos por todo el mapa (cada ~160 px), porque solo se usan los cercanos al jugador. Los `enemigo` van en zonas abiertas; los `enemigo-suelo` exactamente sobre la superficie del suelo (y = fila del tile × 16), con al menos un tile de suelo a cada lado.
+- Objetos `enemigo` (voladores) y `enemigo-suelo` (caminantes): puntos de aparición repartidos por todo el mapa (cada ~320 px), porque solo se usan los cercanos al jugador. Los `enemigo` van en zonas abiertas; los `enemigo-suelo` exactamente sobre la superficie del suelo (y = fila del tile × 16), con al menos un tile de suelo a cada lado.
 - Cierra los extremos del mapa con muros y recuerda que los fosos sin fondo matan al instante.
 - Al añadir capas u objetos, actualiza `nextlayerid` / `nextobjectid` para que Tiled no duplique ids.
 
-## Diseño (pantalla de 480x270 = 30x17 tiles visibles; la cámara sigue al jugador)
+## Diseño (pantalla de 960x540 = 30x17 tiles visibles; la cámara sigue al jugador)
 
 - Salto del jugador: ~60 px (3–4 tiles) de altura y ~5 tiles de distancia. Separaciones verticales de 3 tiles; huecos de 2–4 tiles.
 - Verticalidad y escala: niveles más altos que anchos cuando se pueda, con la estructura saliendo del encuadre (cuando haya cámara que siga al jugador).

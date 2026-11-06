@@ -5,7 +5,7 @@ import { Lienzo, ruido } from '../tools/pixel/lienzo.js';
 import { JEFES } from '../src/config/combate.js';
 
 const RADIO = JEFES.estibador.cargado.radio;
-const T = 2 * RADIO + 16;
+const T = 2 * RADIO + 32;
 const C = (T - 1) / 2;
 
 const anillo = (desde, hasta, color) => (x, y) => {
@@ -15,18 +15,19 @@ const anillo = (desde, hasta, color) => (x, y) => {
 
 function aviso() {
     const l = new Lienzo(T, T);
-    return l.patron(0, 0, T, T, anillo(RADIO - 1, RADIO + 0.5, (x, y) => {
+    return l.patron(0, 0, T, T, anillo(RADIO - 3, RADIO + 1, (x, y, d) => {
         const a = Math.atan2(y - C, x - C);
-        return Math.floor((a + Math.PI) / (Math.PI / 24)) % 2 ? 'j' : null;
+        if (!(Math.floor((a + Math.PI) / (Math.PI / 32)) % 2)) return null;
+        return d < RADIO - 2 ? 'i' : 'j';
     }));
 }
 
 function descarga() {
     const l = new Lienzo(T, T);
-    l.patron(0, 0, T, T, anillo(RADIO - 10, RADIO + 1, (x, y, d) => {
-        const n = ruido(x, y, 81);
-        if (d > RADIO - 3) return '9';
-        if (d > RADIO - 6) return n > 0.3 ? 'j' : '9';
+    l.patron(0, 0, T, T, anillo(RADIO - 20, RADIO + 2, (x, y, d) => {
+        const n = ruido(x >> 1, y >> 1, 81);
+        if (d > RADIO - 5) return '9';
+        if (d > RADIO - 12) return n > 0.3 ? 'j' : '9';
         return n > 0.55 ? 'i' : null;
     }));
     return l;
@@ -34,11 +35,12 @@ function descarga() {
 
 function disipando() {
     const l = new Lienzo(T, T);
-    return l.patron(0, 0, T, T, anillo(RADIO - 2, RADIO + 3, (x, y) => (ruido(x, y, 82) > 0.6 ? 'i' : null)));
+    return l.patron(0, 0, T, T, anillo(RADIO - 4, RADIO + 6, (x, y) => { const n = ruido(x >> 1, y >> 1, 82); return n > 0.85 ? 'j' : n > 0.6 ? 'i' : null; }));
 }
 
 export default {
     nombre: 'onda-jefe',
+    hd: true,
     ancho: T,
     alto: T,
     frames: () => [aviso(), descarga(), disipando()],

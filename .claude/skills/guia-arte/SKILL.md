@@ -31,10 +31,10 @@ Fuente de verdad: [tools/pixel/paleta.js](../../../tools/pixel/paleta.js). **Pro
 
 ## Tamaños y rejilla
 
-- Resolución del juego: **480x270**. 1 píxel del arte = 1 píxel del juego. Nunca ampliar ni reducir sprites en el código.
-- Tiles: **16x16**. Los niveles se construyen en esta rejilla.
-- Jugador: frame de **16x32** (cuerpo ~10x30). Humanoides comunes al mismo tamaño; enemigos grandes en múltiplos de 16.
-- Proyectiles/partículas: 1–4 px.
+- Resolución del juego: **960x540**. 1 píxel del arte = 1 píxel del juego. Nunca ampliar ni reducir sprites en el código.
+- Tiles: **32x32**. Los niveles se construyen en esta rejilla.
+- Jugador: frame de **32x64** (cuerpo ~20x60). Humanoides comunes al mismo tamaño; enemigos grandes en múltiplos de 32.
+- Proyectiles y partículas: hasta 16 px.
 - Hojas de sprites: frames en horizontal, todos del mismo tamaño.
 
 ## Reglas de dibujo
@@ -45,19 +45,19 @@ Fuente de verdad: [tools/pixel/paleta.js](../../../tools/pixel/paleta.js). **Pro
 - Sombreado por bandas (2–4 tonos de una rampa). Nada de degradados de píxel a píxel ni "pillow shading" (sombrear desde el contorno hacia dentro).
 - Evitar píxeles huérfanos y escaleras irregulares en diagonales (patrones 1-1, 2-2, 1-2 constantes).
 - Detalle con ruido determinista (`ruido()` de `lienzo.js`), nunca `Math.random()`: el arte debe ser reproducible.
-- Animación: 2 frames para respirar (2 fps), 4–6 para correr (8–12 fps). Rebote vertical de 1 px.
+- Animación: 2 frames para respirar (2 fps), 4–6 para correr (8–12 fps). Rebote vertical de 1-2 px.
 
 ## Personajes
 
 > Retratos, iconos, portadas de capítulo y fichas de enemigos siguen además la skill `ilustracion` (dark anime fantasy entintado, tecno-gótico).
 
-- Siluetas legibles a 16x32: una forma dominante (abrigo, capucha, casco) y **un** punto de luz que guía la mirada (visor, ojo, núcleo).
+- Siluetas legibles a 32x64: una forma dominante (abrigo, capucha, casco) y **un** punto de luz que guía la mirada (visor, ojo, núcleo).
 - Rostros ocultos o mínimos (visores, máscaras, sombra de capucha).
 - Jugador: errante encapuchado, abrigo largo gris azulado, bufanda de óxido, visor cian ([arte/jugador.js](../../../arte/jugador.js)). Mira a la derecha.
 - Enemigos: siluetas orgánico-mecánicas, extremidades largas, acentos rojos.
 
 ## Composición de niveles y fondos
 
-- Fondo parallax en 3–4 capas: megaestructura lejana (tonos `4`–`6`, plana) → estructuras medias (`2`–`4`) → plano de juego (`1`–`5` con acentos) → primer plano opcional en `0` muy oscuro.
+- Fondo parallax en 2–4 capas: megaestructura lejana (tonos `0`–`2`, plana) → estructuras medias (`0`–`2`), siempre más oscuras que la roca para no confundirse con pared → plano de juego (`1`–`5` con acentos) → primer plano opcional en `0` muy oscuro.
 - El plano jugable debe distinguirse del fondo: superficies pisables con borde superior iluminado (`6`/`5`).
 - Repetir tiles en patrones de 2–4 variantes para que no se note la rejilla.

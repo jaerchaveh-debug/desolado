@@ -15,14 +15,14 @@ export default class CapituloCompletadoScene extends PantallaSuperpuesta {
     construir() {
         const capitulo = buscarCapitulo(this.datosJuego.capitulo);
         const siguiente = CAPITULOS[CAPITULOS.indexOf(capitulo) + 1];
-        this.texto(100, `CAPITULO ${capitulo.numero}`, COLORES.GRIS);
-        this.texto(118, 'COMPLETADO', COLORES.CIAN, 2);
-        this.texto(140, capitulo.titulo, COLORES.GRIS_OSCURO);
+        this.texto(200, `CAPITULO ${capitulo.numero}`, COLORES.GRIS);
+        this.texto(236, 'COMPLETADO', COLORES.CIAN, 2);
+        this.texto(280, capitulo.titulo, COLORES.GRIS_OSCURO);
         if (siguiente) {
             const texto = siguiente.disponible ? `CAPITULO ${siguiente.numero} DESBLOQUEADO` : `CAPITULO ${siguiente.numero}: PROXIMAMENTE`;
-            this.texto(156, texto, COLORES.GRIS_OSCURO);
+            this.texto(312, texto, COLORES.GRIS_OSCURO);
         }
-        this.menu(174, [{ texto: 'MENU PRINCIPAL', accion: () => this.irAlMenu() }]);
-        this.texto(204, 'ENTER/E ACEPTAR', COLORES.GRIS_OSCURO);
+        this.menu(348, [{ texto: 'MENU PRINCIPAL', accion: () => this.irAlMenu() }]);
+        this.texto(408, 'ENTER/E ACEPTAR', COLORES.GRIS_OSCURO);
     }
 }

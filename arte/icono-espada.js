@@ -1,33 +1,35 @@
-// Icono de inventario de la espada de energía (skill `ilustracion`), 32x32, en
+// Icono de inventario de la espada de energía (skill `ilustracion`), 64x64, en
 // diagonal con la empuñadura abajo a la izquierda. Hoja de luz cian (el único foco),
 // guarda de placas, mango forrado con cordón de óxido y pomo remachado, como la
 // espada del juego (arte/espada.js).
 
 import { Lienzo } from '../tools/pixel/lienzo.js';
 
-const LADO = 32;
+const LADO = 64;
 
 export default {
     nombre: 'icono-espada',
     tipo: 'sprite',
+    hd: true,
     ancho: LADO, alto: LADO,
     frames: () => {
         const l = new Lienzo(LADO, LADO);
-        // Hoja: banda diagonal de 3 px con núcleo blanco y filo claro arriba
-        l.poligono([[11, 18], [26, 3], [29, 3], [29, 6], [14, 21]], 'g');
-        l.linea(13, 19, 27, 5, 'h').linea(14, 19, 28, 5, '9');
-        l.linea(14, 21, 29, 6, 'f');
+        // Hoja: banda diagonal con núcleo blanco, filo claro arriba y lomo apagado
+        l.poligono([[22, 35], [50, 7], [60, 2], [56, 13], [28, 41]], 'g');
+        l.linea(24, 35, 52, 7, 'h').linea(25, 35, 53, 7, 'h');
+        l.linea(26, 37, 54, 9, '9').linea(27, 37, 55, 9, '9').linea(26, 38, 54, 10, '9');
+        l.linea(28, 41, 55, 14, 'f').linea(28, 40, 55, 13, 'f');
         // Guarda perpendicular a la hoja
-        l.poligono([[7, 16], [10, 13], [18, 21], [15, 24]], '5');
-        l.linea(8, 15, 10, 13, '7').punto(16, 22, '3');
+        l.poligono([[14, 32], [20, 26], [36, 42], [30, 48]], '5');
+        l.linea(16, 30, 20, 26, '8').linea(15, 31, 19, 27, '7').linea(31, 47, 35, 43, '3');
+        for (const [x, y] of [[20, 32], [28, 40]]) l.rect(x, y, 2, 2, '8').punto(x + 1, y + 1, '3');
         // Mango con cordón de óxido y pomo
-        l.poligono([[9, 20], [11, 22], [5, 28], [3, 26]], '3');
-        [[8, 22], [6, 24], [4, 26]].forEach(([x, y]) => l.punto(x, y, 'c').punto(x + 1, y + 1, 'c'));
-        l.rect(1, 27, 4, 4, '4').punto(2, 28, '7');
-        l.trazos((x, y) => '35'.includes(l.color(x, y)) && x + y > 32, '2', { separacion: 2, inclinacion: -1, rotura: 0.2, semilla: 2 });
-        l.entintar('0', { lados: ['abajo', 'derecha'], irregular: 0.2, semilla: 5 });
+        l.poligono([[20, 38], [24, 42], [10, 56], [6, 52]], '3');
+        for (const [x, y] of [[16, 44], [13, 47], [10, 50]]) l.linea(x, y, x + 4, y + 4, 'c').linea(x - 1, y, x + 3, y + 4, 'b');
+        l.poligono([[6, 51], [11, 56], [6, 61], [1, 56]], '4').linea(1, 56, 6, 51, '6').rect(5, 55, 2, 2, '7');
+        l.trazos((x, y) => '35'.includes(l.color(x, y)) && x + y > 70, '4', { separacion: 3, inclinacion: -1, rotura: 0.2, semilla: 2 });
+        l.entintar('0', { lados: ['abajo', 'derecha'], irregular: 0.1, semilla: 5 });
         // Brillo de la punta
-        l.punto(29, 3, '9');
-        return [l];
+        return [l.rect(58, 3, 2, 2, '9')];
     }
 };

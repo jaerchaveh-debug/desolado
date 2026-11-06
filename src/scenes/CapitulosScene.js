@@ -23,7 +23,7 @@ export default class CapitulosScene extends MenuBase {
         });
         opciones.push({ texto: 'VOLVER', accion: () => this.irA('MenuScene') });
 
-        this.menu({ y: 96, opciones, alVolver: () => this.irA('MenuScene') });
+        this.menu({ y: 192, opciones, alVolver: () => this.irA('MenuScene') });
         this.pie('W/S ELEGIR   ENTER/E JUGAR   ESC VOLVER');
     }
 }

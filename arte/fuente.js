@@ -1,6 +1,7 @@
-// Fuente pixel art para la interfaz. Glifos de 5x7 en celdas de 6x8 (1 px de separación);
-// las minúsculas con cola usan también la octava fila.
-// Se dibuja en casi blanco ('9') para poder teñirla en Phaser con cualquier color de la paleta.
+// Fuente pixel art para la interfaz. Los glifos se definen en una rejilla de 5x7 (celdas de 6x8, con 1 de
+// separación; las minúsculas con cola usan también la octava fila) y se dibujan a 12x16 con diagonales
+// suaves y el canto inferior de cada trazo en sombra, para dar volumen.
+// Se dibuja en casi blanco ('9', sombra '7') para poder teñirla en Phaser con cualquier color de la paleta.
 // PreloadScene la registra como fuente bitmap (RetroFont) con la clave 'fuente'.
 
 import { Lienzo } from '../tools/pixel/lienzo.js';
@@ -8,6 +9,7 @@ import { Lienzo } from '../tools/pixel/lienzo.js';
 const ANCHO = 6;
 const ALTO = 8;
 const COLOR = '9';
+const SOMBRA = '7';
 
 const GLIFOS = {
     ' ': ['.....', '.....', '.....', '.....', '.....', '.....', '.....'],
@@ -25,7 +27,7 @@ const GLIFOS = {
     'L': ['#....', '#....', '#....', '#....', '#....', '#....', '#####'],
     'M': ['#...#', '##.##', '#.#.#', '#.#.#', '#...#', '#...#', '#...#'],
     'N': ['#...#', '##..#', '#.#.#', '#..##', '#...#', '#...#', '#...#'],
-    'Ñ': ['.###.', '.....', '#...#', '##..#', '#.#.#', '#..##', '#...#'],
+    'Ñ': 'N',
     'O': ['.###.', '#...#', '#...#', '#...#', '#...#', '#...#', '.###.'],
     'P': ['####.', '#...#', '#...#', '####.', '#....', '#....', '#....'],
     'Q': ['.###.', '#...#', '#...#', '#...#', '#.#.#', '#..#.', '.##.#'],
@@ -56,12 +58,12 @@ const GLIFOS = {
     '-': ['.....', '.....', '.....', '.###.', '.....', '.....', '.....'],
     '/': ['....#', '....#', '...#.', '..#..', '.#...', '#....', '#....'],
     '>': ['.#...', '..#..', '...#.', '....#', '...#.', '..#..', '.#...'],
-    // Vocales acentuadas: tilde en la fila de arriba y la letra en 6 filas
-    'Á': ['....#', '.###.', '#...#', '#...#', '#####', '#...#', '#...#'],
-    'É': ['....#', '####.', '#....', '####.', '#....', '#....', '#####'],
-    'Í': ['....#', '.###.', '..#..', '..#..', '..#..', '..#..', '.###.'],
-    'Ó': ['....#', '.###.', '#...#', '#...#', '#...#', '#...#', '.###.'],
-    'Ú': ['...#.', '#...#', '#...#', '#...#', '#...#', '#...#', '.###.'],
+    // Mayúsculas acentuadas: se construyen desde su letra base (ver acentuada)
+    'Á': 'A',
+    'É': 'E',
+    'Í': 'I',
+    'Ó': 'O',
+    'Ú': 'U',
     '¡': ['..#..', '.....', '..#..', '..#..', '..#..', '..#..', '..#..'],
     '¿': ['..#..', '.....', '..#..', '.#...', '#....', '#...#', '.###.'],
     // Minúsculas: altura x de 5 filas (2-6). Las que tienen cola (g, j, p, q, y) llevan
@@ -93,27 +95,66 @@ const GLIFOS = {
     'x': ['.....', '.....', '#...#', '.#.#.', '..#..', '.#.#.', '#...#'],
     'y': ['.....', '.....', '#...#', '#...#', '#...#', '.####', '....#', '.###.'],
     'z': ['.....', '.....', '#####', '...#.', '..#..', '.#...', '#####'],
-    'á': ['...#.', '..#..', '.###.', '....#', '.####', '#...#', '.####'],
-    'é': ['...#.', '..#..', '.###.', '#...#', '#####', '#....', '.###.'],
+    'á': ['...#.', '.....', '.###.', '....#', '.####', '#...#', '.####'],
+    'é': ['...#.', '.....', '.###.', '#...#', '#####', '#....', '.###.'],
     'í': ['...#.', '..#..', '.....', '.##..', '..#..', '..#..', '.###.'],
-    'ó': ['...#.', '..#..', '.###.', '#...#', '#...#', '#...#', '.###.'],
-    'ú': ['...#.', '..#..', '#...#', '#...#', '#...#', '#..##', '.##.#'],
+    'ó': ['...#.', '.....', '.###.', '#...#', '#...#', '#...#', '.###.'],
+    'ú': ['...#.', '.....', '#...#', '#...#', '#...#', '#..##', '.##.#'],
     'ü': ['.#.#.', '.....', '#...#', '#...#', '#...#', '#..##', '.##.#']
 };
 
 const CARACTERES = Object.keys(GLIFOS).join('');
 
-function glifo(c) {
+// Glifo a 12x16 desde su rejilla de 5x7
+function ampliar(c) {
     const filas = GLIFOS[c].map(f => f.replaceAll('#', COLOR) + '.');
     if (filas.length < ALTO) filas.push('.'.repeat(ANCHO));   // fila de separación (salvo las colas)
-    return Lienzo.desdeTexto(filas, ANCHO, ALTO, `fuente '${c}'`);
+    return Lienzo.desdeTexto(filas, ANCHO, ALTO, `fuente '${c}'`).ampliado();
+}
+
+// Virgulilla sobre las dos primeras filas
+function virgulilla(l) {
+    return l.rect(0, 0, ANCHO * 2, 2, '.').lineaH(4, 0, 2, COLOR).punto(7, 0, COLOR).punto(3, 1, COLOR).lineaH(6, 1, 2, COLOR);
+}
+
+// Mayúscula con tilde o virgulilla: el cuerpo pierde 3 filas de sus tramos rectos (y=3-13) para dejar
+// la fila 2 libre entre el signo y la letra
+function acentuada(c) {
+    const l = ampliar(GLIFOS[c]);
+    const cuerpo = l.px.slice(0, 14);
+    for (let quitadas = 0; quitadas < 3; quitadas++) {
+        // Se quita una fila de la racha más larga de filas iguales, para no adelgazar los trazos horizontales
+        let mejor = 1, largo = 0;
+        for (let i = 0; i < cuerpo.length;) {
+            let j = i;
+            while (j + 1 < cuerpo.length && cuerpo[j + 1].join('') === cuerpo[i].join('')) j++;
+            if (j - i + 1 > largo) { largo = j - i + 1; mejor = i + Math.floor(largo / 2); }
+            i = j + 1;
+        }
+        cuerpo.splice(mejor, 1);
+    }
+    const r = new Lienzo(ANCHO * 2, ALTO * 2);
+    cuerpo.forEach((fila, y) => { r.px[y + 3] = [...fila]; });
+    if (c === 'Ñ') return virgulilla(r);
+    return r.lineaH(6, 0, 2, COLOR).lineaH(5, 1, 2, COLOR);
+}
+
+function glifo(c) {
+    const l = typeof GLIFOS[c] === 'string' ? acentuada(c) : ampliar(c);
+    if (c === 'ñ') virgulilla(l);
+    // Canto inferior de cada trazo en sombra
+    const borde = [];
+    l.px.forEach((fila, y) => fila.forEach((p, x) => { if (p === COLOR && l.color(x, y + 1) === '.') borde.push([x, y]); }));
+    borde.forEach(([x, y]) => l.punto(x, y, SOMBRA));
+    return l;
 }
 
 export default {
     nombre: 'fuente',
     tipo: 'fuente',
-    ancho: ANCHO,
-    alto: ALTO,
+    hd: true,
+    ancho: ANCHO * 2,
+    alto: ALTO * 2,
     caracteres: CARACTERES,
     frames: () => [...CARACTERES].map(glifo)
 };

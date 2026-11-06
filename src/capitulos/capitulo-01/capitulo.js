@@ -19,11 +19,11 @@ export default {
         reduccion: 500,         // ...su intervalo se acorta estos ms...
         intervaloMinimo: 1500,  // ...hasta este mínimo
         maximo: 12,             // enemigos vivos a la vez (todos los tipos), para no saturar la pantalla
-        distanciaMin: 120,      // px: no aparecer encima del jugador
-        distanciaMax: 360,      // px: aparecer cerca para que llegue pronto (el mapa es más ancho que la pantalla)
+        distanciaMin: 240,      // px: no aparecer encima del jugador
+        distanciaMax: 720,      // px: aparecer cerca para que llegue pronto (el mapa es más ancho que la pantalla)
         // Un enemigo vivo a más de esta distancia del jugador desaparece y reaparece en un punto
         // dentro de la vista del jugador, sin esperar al intervalo de aparición (no cuenta como aparición nueva)
-        distanciaReubicar: 480,
+        distanciaReubicar: 960,
         revisarReubicacion: 500 // ms entre comprobaciones
     },
 

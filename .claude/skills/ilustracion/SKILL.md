@@ -39,13 +39,13 @@ La de [tools/pixel/paleta.js](../../../tools/pixel/paleta.js). Las rampas pastel
 
 | Uso | Tamaño | Notas |
 |---|---|---|
-| Icono de HUD | 16x16 | como `hud-escopeta`; tinta de 1 px, sin trazos (no se leen) |
-| Icono de objeto o arma | 24x24 o 32x32 | tinta variable y algún trazo; silueta legible sobre `1` |
-| Retrato de diálogo | 64x64 (busto) | un frame por **expresión** (`neutro`, `dolor`, `ira`...); fondo transparente |
-| Ficha de enemigo o jefe | 96x128 | cuerpo entero o tres cuartos, con amenaza en rojo |
-| Portada de capítulo | hasta 240x256 | borde **transparente e irregular** (manchas de tinta, desgarros) para componerse sobre un fondo oscuro; nunca rectangular a sangre |
+| Icono de HUD | 32x32 | como `hud-escopeta`; tinta de 1 px, sin trazos (no se leen) |
+| Icono de objeto o arma | 48x48 o 64x64 | tinta variable y algún trazo; silueta legible sobre `1` |
+| Retrato de diálogo | 128x128 (busto) | un frame por **expresión** (`neutro`, `dolor`, `ira`...); fondo transparente |
+| Ficha de enemigo o jefe | 96x128 (tamaño del jefe en el juego) o más | cuerpo entero o tres cuartos, con amenaza en rojo |
+| Portada de capítulo | hasta 480x512 | borde **transparente e irregular** (manchas de tinta, desgarros) para componerse sobre un fondo oscuro; nunca rectangular a sangre |
 
-Nada supera la pantalla (480x270), y todo se muestra 1:1, sin `setScale`.
+Nada supera la pantalla (960x540), y todo se muestra 1:1, sin `setScale`.
 
 ## Técnica de dibujo con código
 
@@ -58,9 +58,9 @@ Orden recomendado (las herramientas están en la skill `sprite-pixel`):
 5. **Tinta exterior**: `entintar('0', { lados: ['abajo', 'derecha'], irregular: 0.2 })` sobre la figura completa (los lados opuestos a la luz). En iconos de 16 px, `contorno('0')` normal.
 6. **Toques finales**, encima de la tinta: brillo de los ojos (`9`/`h`), rojo del horror, un solo foco de luz.
 
-### Rostros a escala de píxel (retrato 64x64)
+### Rostros a escala de píxel (retrato 128x128)
 
-- Cabeza ~28-32 px de alto; ojos de 4-6 px de alto y 4-5 de ancho, a media altura de la cabeza. Iris en la rampa del personaje, pupila `0` y **brillo** de 1-2 px `9` (o `h` si es luz artificial) arriba, del lado de la luz.
+- Cabeza ~56-64 px de alto; ojos de 8-12 px de alto y 8-10 de ancho, a media altura de la cabeza. Iris en la rampa del personaje, pupila `0` y **brillo** de 2-4 px `9` (o `h` si es luz artificial) arriba, del lado de la luz.
 - Pestañas superiores: línea de `0` de 2 px de grosor que sobresale 1 px hacia fuera; ceja de 1 px, separada del ojo.
 - Nariz: 1-2 píxeles de sombra (`l`); boca: 2-4 px de `l` o `m`, sin contorno cerrado.
 - Mandíbula afilada y barbilla estrecha; cuello fino. La expresión cambia sobre todo con las cejas, los párpados y la boca: los frames de expresión parten de `base.copia()` y solo redibujan eso.
@@ -89,4 +89,4 @@ Orden recomendado (las herramientas están en la skill `sprite-pixel`):
 - Retratos: `retrato-<personaje>`, frames por expresión documentados en la cabecera.
 - Fichas: `ficha-<enemigo>` (p. ej. `ficha-estibador`).
 - Portadas: `portada-capitulo-NN`.
-- Iconos: `hud-<cosa>` (16x16) o `icono-<cosa>` (24-32 px).
+- Iconos: `hud-<cosa>` (32x32) o `icono-<cosa>` (48-64 px).

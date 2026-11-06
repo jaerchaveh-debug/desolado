@@ -10,11 +10,11 @@ import { PERSONAJES } from '../config/personajes';
 // E / ENTER / ESPACIO / clic: completa el texto y, si ya está entero, pasa a la
 // siguiente línea; tras la última, cierra, reanuda GameScene y llama a alTerminar.
 
-const CAJA = { x: 8, y: 194, ancho: 464, alto: 68 };
-const RETRATO = { x: 14, y: 196 };          // 64x64, esquina superior izquierda
-const TEXTO_X = 88;
-const ANCHO_LETRA = 6;                      // celda de la fuente
-const MAX_LETRAS = Math.floor((CAJA.x + CAJA.ancho - 10 - TEXTO_X) / ANCHO_LETRA);
+const CAJA = { x: 16, y: 388, ancho: 928, alto: 136 };
+const RETRATO = { x: 28, y: 392 };          // 128x128, esquina superior izquierda
+const TEXTO_X = 176;
+const ANCHO_LETRA = 12;                     // celda de la fuente
+const MAX_LETRAS = Math.floor((CAJA.x + CAJA.ancho - 20 - TEXTO_X) / ANCHO_LETRA);
 const ESPERA = 350;                         // ms sin aceptar teclas, por si venían pulsadas del juego
 
 // ms que se espera tras escribir cada carácter: los puntos y exclamaciones pesan más
@@ -56,16 +56,16 @@ export default class DialogoScene extends Phaser.Scene {
 
         const fondo = this.add.rectangle(CAJA.x, CAJA.y, CAJA.ancho, CAJA.alto, COLORES.NEGRO).setOrigin(0).setAlpha(0.92);
         const bordes = [
-            this.add.rectangle(CAJA.x, CAJA.y, CAJA.ancho, 1, COLORES.CIAN_OSCURO).setOrigin(0),
-            this.add.rectangle(CAJA.x, CAJA.y + CAJA.alto - 1, CAJA.ancho, 1, COLORES.CIAN_OSCURO).setOrigin(0)
+            this.add.rectangle(CAJA.x, CAJA.y, CAJA.ancho, 2, COLORES.CIAN_OSCURO).setOrigin(0),
+            this.add.rectangle(CAJA.x, CAJA.y + CAJA.alto - 2, CAJA.ancho, 2, COLORES.CIAN_OSCURO).setOrigin(0)
         ];
-        this.marcoRetrato = this.add.rectangle(RETRATO.x - 1, RETRATO.y - 1, 66, 66, COLORES.GRIS_PROFUNDO).setOrigin(0);
+        this.marcoRetrato = this.add.rectangle(RETRATO.x - 2, RETRATO.y - 2, 132, 132, COLORES.GRIS_PROFUNDO).setOrigin(0);
         this.retrato = this.add.image(RETRATO.x, RETRATO.y, '__MISSING').setOrigin(0);
-        this.nombre = this.add.bitmapText(TEXTO_X, CAJA.y + 8, 'fuente', '').setTint(COLORES.CIAN);
-        this.texto = this.add.bitmapText(TEXTO_X, CAJA.y + 22, 'fuente', '').setTint(COLORES.BLANCO);
-        this.texto.setLineSpacing(3);
+        this.nombre = this.add.bitmapText(TEXTO_X, CAJA.y + 16, 'fuente', '').setTint(COLORES.CIAN);
+        this.texto = this.add.bitmapText(TEXTO_X, CAJA.y + 44, 'fuente', '').setTint(COLORES.BLANCO);
+        this.texto.setLineSpacing(6);
         // Aviso de que se puede seguir: parpadea cuando el texto está completo
-        this.indicador = this.add.bitmapText(CAJA.x + CAJA.ancho - 12, CAJA.y + CAJA.alto - 12, 'fuente', '>')
+        this.indicador = this.add.bitmapText(CAJA.x + CAJA.ancho - 24, CAJA.y + CAJA.alto - 24, 'fuente', '>')
             .setTint(COLORES.CIAN).setVisible(false);
         this.tweens.add({ targets: this.indicador, alpha: 0.2, duration: 300, yoyo: true, repeat: -1 });
 
@@ -102,7 +102,7 @@ export default class DialogoScene extends Phaser.Scene {
             this.retrato.setTexture(personaje.retrato, personaje.expresiones[linea.expresion ?? 'neutro'] ?? 0);
             if (linea.sobresalto) {
                 this.retrato.y = RETRATO.y;
-                this.tweens.add({ targets: this.retrato, y: RETRATO.y - 3, duration: 60, yoyo: true, repeat: 1 });
+                this.tweens.add({ targets: this.retrato, y: RETRATO.y - 6, duration: 60, yoyo: true, repeat: 1 });
             }
         }
         this.escribir(ajustar(linea.texto));

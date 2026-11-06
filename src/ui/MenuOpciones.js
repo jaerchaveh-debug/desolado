@@ -6,7 +6,7 @@ import { COLORES } from './colores';
 // opciones: [{ texto, accion, habilitada = true }]. Las deshabilitadas se ven apagadas y se saltan.
 export default class MenuOpciones {
 
-    constructor(scene, { x, y, separacion = 16, opciones, espera = 0, alVolver = null }) {
+    constructor(scene, { x, y, separacion = 32, opciones, espera = 0, alVolver = null }) {
         this.scene = scene;
         this.opciones = opciones.map(o => ({ habilitada: true, ...o }));
         this.indice = this.opciones.findIndex(o => o.habilitada);
@@ -66,7 +66,7 @@ export default class MenuOpciones {
             t.setTint(!o.habilitada ? COLORES.APAGADO : i === this.indice ? COLORES.CIAN : COLORES.GRIS);
         });
         const t = this.textos[this.indice];
-        if (t) this.cursor.setPosition(Math.round(t.x - t.width / 2 - 8), t.y);
+        if (t) this.cursor.setPosition(Math.round(t.x - t.width / 2 - 16), t.y);
     }
 
     aceptar() {

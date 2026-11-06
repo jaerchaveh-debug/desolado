@@ -24,8 +24,8 @@ export default class PantallaSuperpuesta extends Phaser.Scene {
 
         // Marco de terminal: dos líneas cian tenues
         this.contenido.push(
-            this.add.rectangle(this.cx, 88, 220, 1, COLORES.CIAN_OSCURO),
-            this.add.rectangle(this.cx, 190, 220, 1, COLORES.CIAN_OSCURO)
+            this.add.rectangle(this.cx, 176, 440, 2, COLORES.CIAN_OSCURO),
+            this.add.rectangle(this.cx, 380, 440, 2, COLORES.CIAN_OSCURO)
         );
 
         this.construir();
@@ -42,7 +42,7 @@ export default class PantallaSuperpuesta extends Phaser.Scene {
     }
 
     menu(y, opciones) {
-        const menu = new MenuOpciones(this, { x: this.cx, y, separacion: 14, opciones, espera: this.espera ?? 600 });
+        const menu = new MenuOpciones(this, { x: this.cx, y, separacion: 28, opciones, espera: this.espera ?? 600 });
         this.contenido.push(...menu.objetos);
         return menu;
     }

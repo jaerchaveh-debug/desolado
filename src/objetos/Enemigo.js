@@ -2,8 +2,8 @@ import Phaser from 'phaser';
 import { ENEMIGOS } from '../config/combate';
 import { sonar } from '../sistema/sonido';
 
-const CAIDA_MAXIMA = 48;   // px que un enemigo de suelo se deja caer (3 tiles); más es un foso
-const ALTURA_ATAQUE = 20;  // px de diferencia vertical máxima con el objetivo para atacarle
+const CAIDA_MAXIMA = 96;   // px que un enemigo de suelo se deja caer (3 tiles); más es un foso
+const ALTURA_ATAQUE = 40;  // px de diferencia vertical máxima con el objetivo para atacarle
 
 // Evento de escena que se emite al eliminar un enemigo, con su tipo y el propio enemigo como argumentos
 export const EVENTO_ELIMINADO = 'enemigo-eliminado';
@@ -52,6 +52,14 @@ export default class Enemigo extends Phaser.Physics.Arcade.Sprite {
         return this;
     }
 
+    // Mira hacia un lado y refleja la hitbox con él (Phaser no invierte el offset del cuerpo con flipX)
+    mirar(izquierda) {
+        if (izquierda === this.flipX) return;
+        this.flipX = izquierda;
+        const { ancho, x, y } = this.datos.hitbox;
+        this.body.setOffset(izquierda ? this.width - x - ancho : x, y);
+    }
+
     // Desaparece con un fundido, se traslada a (x, y) y reaparece. Mientras tanto no se mueve ni recibe golpes.
     // 'y' es el punto de aparición: para los de suelo, donde apoyan los pies.
     reubicar(x, y) {
@@ -94,7 +102,7 @@ export default class Enemigo extends Phaser.Physics.Arcade.Sprite {
     // Objetivo delante (en la dirección en que mira), dentro de 'distancia' px y a una altura parecida
     objetivoAlAlcance(distancia) {
         const dx = (this.objetivo.x - this.x) * (this.flipX ? -1 : 1);
-        return dx > -4 && dx < distancia && Math.abs(this.objetivo.y - this.y) < ALTURA_ATAQUE;
+        return dx > -8 && dx < distancia && Math.abs(this.objetivo.y - this.y) < ALTURA_ATAQUE;
     }
 
     // Sonido de 'datos.sonidos' (golpe, ataque, morir), situado en su posición
@@ -113,7 +121,7 @@ export default class Enemigo extends Phaser.Physics.Arcade.Sprite {
 
     golpear() {
         // Margen extra: las cuchillas llegan algo más lejos que la distancia a la que decide atacar
-        if (this.vivo && this.objetivoAlAlcance(this.datos.ataque.alcance + 10)) {
+        if (this.vivo && this.objetivoAlAlcance(this.datos.ataque.alcance + 20)) {
             this.scene.danarJugador(this.datos.ataque.danio, this.x);
         }
     }
@@ -161,13 +169,13 @@ export default class Enemigo extends Phaser.Physics.Arcade.Sprite {
         const dy = this.objetivo.y - this.y;
         const d = Math.hypot(dx, dy) || 1;
         const v = this.datos.velocidad;
-        const balanceo = Math.sin(time / 300 + this.fase) * 12;
+        const balanceo = Math.sin(time / 300 + this.fase) * 24;
         this.setVelocity((dx / d) * v, (dy / d) * v + balanceo);
-        this.flipX = dx < 0;
+        this.mirar(dx < 0);
     }
 
     haySueloBajo(x, y) {
-        for (let d = 0; d <= CAIDA_MAXIMA; d += 16) {
+        for (let d = 0; d <= CAIDA_MAXIMA; d += 32) {
             if (this.scene.nivel.getTileAtWorldXY(x, y + d)?.collideUp) return true;
         }
         return false;
@@ -181,8 +189,8 @@ export default class Enemigo extends Phaser.Physics.Arcade.Sprite {
         }
 
         const dx = this.objetivo.x - this.x;
-        const dir = Math.abs(dx) < 4 ? 0 : Math.sign(dx);
-        if (dir !== 0) this.flipX = dir < 0;
+        const dir = Math.abs(dx) < 8 ? 0 : Math.sign(dx);
+        if (dir !== 0) this.mirar(dir < 0);
 
         const ataque = this.datos.ataque;
         if (ataque && body.blocked.down && this.scene.time.now >= this.proximoAtaque
@@ -195,8 +203,8 @@ export default class Enemigo extends Phaser.Physics.Arcade.Sprite {
         if (avanza) {
             // No avanzar contra un muro ni hacia un foso; sí bajar desniveles de hasta CAIDA_MAXIMA
             const muro = dir < 0 ? body.blocked.left : body.blocked.right;
-            const xDelante = dir < 0 ? body.left - 2 : body.right + 2;
-            avanza = !muro && this.haySueloBajo(xDelante, body.bottom + 2);
+            const xDelante = dir < 0 ? body.left - 4 : body.right + 4;
+            avanza = !muro && this.haySueloBajo(xDelante, body.bottom + 4);
         }
 
         this.setVelocityX(avanza ? dir * this.datos.velocidad : 0);

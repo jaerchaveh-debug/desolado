@@ -18,9 +18,9 @@ export default {
     type: Phaser.AUTO,
     parent: 'game',
 
-    // Resolución base del pixel art: escala x4 exacta a 1080p
-    width: 480,
-    height: 270,
+    // Resolución base del pixel art: escala x2 exacta a 1080p
+    width: 960,
+    height: 540,
 
     // Filtrado nearest y posiciones enteras (también activa roundPixels)
     pixelArt: true,
@@ -35,8 +35,11 @@ export default {
         default: 'arcade',
         arcade: {
             gravity: {
-                y: 900
+                y: 1800
             },
+            // Márgenes de separación de Arcade ajustados a tiles de 32 px (por defecto 16 y 4)
+            tileBias: 32,
+            overlapBias: 8,
             debug: false
         }
     },

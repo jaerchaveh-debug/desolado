@@ -1,4 +1,4 @@
-// Retrato de diálogo del protagonista (skill `ilustracion`), busto de 64x64 mirando
+// Retrato de diálogo del protagonista (skill `ilustracion`), busto de 128x128 mirando
 // un poco a la derecha, como el sprite `jugador`.
 //
 // El errante: hombre joven, callado y estoico. Está perdido en la megaestructura y
@@ -16,97 +16,106 @@
 
 import { Lienzo } from '../tools/pixel/lienzo.js';
 
-const LADO = 64;
-const PELO = '6789st';
+const LADO = 128;
 
 // Mechones que caen sobre el visor y por los lados: [base izquierda, base derecha, codo, punta]
 const MECHONES = [
-    [[16, 22], [21, 20], [19, 30], [17, 40]],
-    [[20, 20], [25, 18], [24, 22], [22, 24]],
-    [[24, 18], [30, 17], [29, 21], [27, 23]],
-    [[29, 17], [34, 16], [33, 22], [32, 24]],
-    [[33, 16], [38, 17], [37, 21], [35, 23]],
-    [[37, 17], [43, 18], [43, 22], [42, 24]],
-    [[42, 19], [47, 22], [47, 28], [46, 39]]
+    [[32, 44], [42, 40], [38, 60], [34, 80]],
+    [[40, 40], [50, 36], [48, 48], [44, 54]],
+    [[48, 36], [60, 34], [58, 42], [54, 46]],
+    [[58, 34], [68, 32], [66, 50], [63, 58]],
+    [[66, 32], [76, 34], [74, 42], [70, 46]],
+    [[74, 34], [86, 36], [85, 48], [82, 52]],
+    [[84, 38], [94, 44], [94, 56], [92, 78]]
 ];
 
-// Luces del visor (los "ojos"), en la fila 28 del cristal
-const OJOS = [[24, 28], [36, 28]];
+// Luces del visor (los "ojos"), en la fila 56 del cristal
+const OJOS = [[48, 56], [72, 56]];
 const LUCES = {
     // Raya horizontal tranquila
-    raya: (l, x, y) => l.lineaH(x, y, 4, 'g').lineaH(x + 1, y, 2, 'h'),
+    raya: (l, x, y) => l.rect(x, y, 8, 2, 'g').rect(x + 2, y, 4, 2, 'h'),
     // Abierta y redonda, más brillante
-    abierta: (l, x, y) => l.rect(x, y - 2, 4, 3, 'g').rect(x + 1, y - 2, 2, 2, 'h'),
+    abierta: (l, x, y) => l.rect(x, y - 4, 8, 6, 'g').rect(x + 1, y - 5, 6, 1, 'g').rect(x + 2, y - 4, 4, 4, 'h'),
     // Apagándose
-    tenue: (l, x, y) => l.lineaH(x, y, 4, 'f').punto(x + 1, y, 'g'),
+    tenue: (l, x, y) => l.rect(x, y, 8, 2, 'f').rect(x + 2, y, 2, 2, 'g'),
     // Fallo: luz roja de error
-    error: (l, x, y) => l.lineaH(x, y, 4, 'i').lineaH(x + 1, y, 2, 'j')
+    error: (l, x, y) => l.rect(x, y, 8, 2, 'i').rect(x + 2, y, 4, 2, 'j')
 };
 
 function base() {
     const l = new Lienzo(LADO, LADO);
 
     // Abrigo y hombros
-    l.poligono([[1, 63], [5, 54], [13, 48], [22, 46], [42, 46], [51, 48], [59, 54], [63, 63]], '3');
+    l.poligono([[2, 127], [10, 108], [26, 96], [44, 92], [84, 92], [102, 96], [118, 108], [126, 127]], '3');
     // Capucha: cabeza y caída sobre los hombros
-    l.elipse(32, 25, 20, 22, '4');
-    l.poligono([[12, 28], [52, 28], [56, 51], [8, 51]], '4');
+    l.elipse(64, 50, 40, 44, '4');
+    l.poligono([[24, 56], [104, 56], [112, 102], [16, 102]], '4');
     // Interior de la capucha y cara en sombra
-    l.elipse(32, 28, 14, 17, '1');
-    l.poligono([[20, 18], [44, 18], [45, 28], [43, 35], [38, 40], [34, 42], [30, 41], [25, 37], [21, 30]], '2');
+    l.elipse(64, 56, 28, 34, '1');
+    l.poligono([[40, 36], [88, 36], [90, 56], [86, 70], [76, 80], [68, 84], [60, 82], [50, 74], [42, 60]], '2');
     // Apenas un filo de piel bajo el visor, del lado de la luz
-    l.lineaH(23, 31, 7, 'l').lineaH(24, 32, 4, 'l');
+    l.rect(47, 63, 10, 1, 'l');
 
-    // Cuello alto de placas
-    l.poligono([[9, 52], [16, 44], [20, 54], [13, 61]], '5');
-    l.poligono([[55, 52], [48, 44], [44, 54], [51, 61]], '5');
-    [[14, 50], [15, 55], [49, 50], [48, 55]].forEach(([x, y]) => l.punto(x, y, '7'));
+    // Cuello alto de placas remachadas
+    l.poligono([[18, 104], [32, 88], [40, 108], [26, 122]], '5');
+    l.poligono([[110, 104], [96, 88], [88, 108], [102, 122]], '5');
+    l.linea(18, 104, 32, 88, '7').linea(96, 88, 110, 104, '6').linea(24, 112, 38, 104, '3').linea(104, 112, 90, 104, '3');
+    for (const [x, y] of [[28, 100], [30, 110], [98, 100], [96, 110]]) l.rect(x, y, 2, 2, '8').punto(x + 1, y + 1, '3');
 
     // Visor bajado: montura y cristal cian, más estrecho del lado lejano
-    l.poligono([[19, 25], [46, 25], [45, 30], [20, 31]], '2');
-    l.poligono([[21, 26], [44, 26], [43, 29], [22, 29]], 'e');
-    l.lineaH(22, 26, 9, 'f').punto(22, 26, 'g');
-    l.rect(17, 26, 2, 3, '5').rect(46, 26, 2, 3, '5');
+    l.poligono([[38, 50], [92, 50], [90, 60], [40, 62]], '2');
+    l.poligono([[42, 52], [88, 52], [86, 58], [44, 58]], 'e');
+    l.lineaH(44, 52, 18, 'f').lineaH(44, 53, 12, 'f').rect(44, 52, 2, 1, 'g');
+    l.linea(52, 58, 56, 52, 'f').linea(54, 58, 58, 52, 'f');   // reflejo del cristal
+    l.rect(34, 52, 4, 6, '5').rect(92, 52, 4, 6, '5').lineaV(34, 52, 6, '7').rect(35, 54, 2, 2, '2');
 
     // Pelo: masa bajo la capucha y mechones sobre el visor
-    l.poligono([[17, 23], [20, 19], [25, 17], [32, 16], [39, 17], [44, 19], [47, 23]], '8');
+    l.poligono([[34, 46], [40, 38], [50, 34], [64, 32], [78, 34], [88, 38], [94, 46]], '8');
     MECHONES.forEach(([a, b, codo, punta]) => l.poligono([a, b, codo, punta], '8'));
     MECHONES.forEach(([a, b, codo, punta], i) => {
-        const medio = [Math.round((a[0] + punta[0]) / 2) + 1, Math.round((a[1] + punta[1]) / 2)];
-        if (i % 2) l.linea(a[0] + 1, a[1] + 1, a[0] + 1, a[1] + 3, '9');
-        else l.linea(a[0] + 1, a[1] + 1, medio[0], medio[1], '9');
+        const medio = [Math.round((a[0] + punta[0]) / 2) + 2, Math.round((a[1] + punta[1]) / 2)];
+        // Brillos a lo largo del mechón y hebras finas
+        l.linea(a[0] + 2, a[1] + 2, medio[0], medio[1], '9');
+        l.linea(a[0] + 4, a[1] + 1, medio[0] + 1, medio[1] - 2, i % 2 ? '7' : '9');
         // Tinta rota por el borde derecho, que acaba en punta
-        l.linea(b[0], b[1] + 2, codo[0], codo[1] - 2, '1');
-        l.punto(codo[0], codo[1] - 1, '2');
+        l.linea(b[0], b[1] + 4, codo[0], codo[1] - 4, '1');
+        l.linea(codo[0], codo[1] - 3, codo[0] - 1, codo[1] - 1, '2');
+        l.linea(a[0] + 5, a[1] + 3, medio[0] - 1, medio[1] + 1, '6');
     });
     // Sombra del borde de la capucha sobre el pelo
-    for (let x = 16; x <= 47; x++) {
-        const y = [...Array(LADO).keys()].find(y => PELO.includes(l.color(x, y)));
-        if (y !== undefined) l.punto(x, y, '6');
+    for (let x = 32; x <= 94; x++) {
+        const y = [...Array(LADO).keys()].find(y => '6789st'.includes(l.color(x, y)));
+        if (y !== undefined) l.punto(x, y, '6').punto(x, y + 1, '7');
     }
-    l.punto(21, 19, 's').punto(22, 20, 't');
-    l.punto(34, 19, 's').punto(35, 20, 's');
-    l.punto(44, 20, 's').punto(44, 21, 's').punto(45, 22, 't');
+    l.linea(42, 38, 44, 40, 's').punto(45, 41, 't');
+    l.linea(68, 38, 70, 40, 's').linea(88, 40, 88, 42, 's').punto(90, 44, 't');
 
     // Bufanda de óxido subida hasta la nariz, con el borde doblado y la cola a la izquierda
-    l.poligono([[19, 33], [45, 32], [48, 38], [49, 46], [45, 53], [19, 53], [15, 46], [17, 38]], 'c');
-    l.poligono([[17, 50], [23, 51], [21, 63], [14, 63]], 'c');
-    l.linea(19, 34, 44, 33, 'd').linea(19, 35, 44, 34, 'b');
-    l.linea(18, 41, 46, 43, 'b').linea(19, 47, 45, 48, 'b').linea(17, 54, 16, 62, 'b');
-    l.linea(20, 39, 38, 40, 'd').lineaV(19, 52, 3, 'd');
+    l.poligono([[38, 66], [90, 64], [96, 76], [98, 92], [90, 106], [38, 106], [30, 92], [34, 76]], 'c');
+    l.poligono([[34, 100], [46, 102], [42, 127], [28, 127]], 'c');
+    l.linea(38, 67, 88, 65, 'd').linea(38, 68, 88, 66, 'd').linea(38, 70, 88, 68, 'b').linea(38, 71, 88, 69, 'a');
+    // Pliegues curvos que convergen hacia el cuello
+    l.cable(34, 78, 94, 82, 'b', 9).cable(34, 79, 94, 83, 'a', 9).cable(34, 90, 94, 86, 'b', 12).cable(34, 91, 94, 87, 'a', 12);
+    l.cable(38, 100, 90, 92, 'b', 8).cable(40, 74, 80, 76, 'd', 6).cable(42, 86, 76, 86, 'd', 7);
+    l.linea(34, 108, 32, 124, 'b').lineaV(38, 104, 6, 'd');
+    // Tinta donde la bufanda monta sobre la capucha
+    l.linea(34, 78, 30, 92, '0').linea(30, 92, 38, 106, '0').linea(96, 76, 98, 92, '0').linea(98, 92, 90, 106, '0');
+    // Costuras del tejido
+    for (let x = 42; x < 88; x += 4) l.punto(x, 74 + (Math.floor(x / 4) % 2), 'b').punto(x + 2, 101, 'b');
 
     // Cordón de cable trenzado sobre el pecho
-    l.linea(24, 56, 41, 59, '2');
-    for (let x = 25; x <= 40; x += 3) l.punto(x, 56 + Math.round((x - 24) * 3 / 17), '6');
-    l.circulo(41, 59, 1, '6');
+    l.linea(48, 112, 82, 118, '1').linea(48, 113, 82, 119, '2');
+    for (let x = 50; x <= 80; x += 4) l.rect(x, 112 + Math.round((x - 48) * 6 / 34), 2, 2, '6');
+    l.circulo(82, 118, 3, '2').circulo(82, 118, 2, '6').punto(81, 117, '8');
 
     // Luz de la capucha (borde superior izquierdo) y sombra con trazos a la derecha
-    l.aclarar((x, y) => l.color(x, y) === '4' && x + y < 36);
-    l.trazos((x, y) => '34'.includes(l.color(x, y)) && x > 44, '2', { separacion: 3, inclinacion: 1, rotura: 0.2, semilla: 3 });
-    l.trazos((x, y) => l.color(x, y) === '3' && x > 36 && y > 55, '2', { separacion: 4, inclinacion: 1, rotura: 0.2, semilla: 4 });
-    l.trazos((x, y) => l.color(x, y) === 'c' && x > 38, 'b', { separacion: 3, inclinacion: -1, rotura: 0.2, semilla: 5 });
+    l.aclarar((x, y) => l.color(x, y) === '4' && x + y < 72);
+    l.aclarar((x, y) => l.color(x, y) === '5' && x + y < 52 && y < 36);
+    l.trazos((x, y) => '34'.includes(l.color(x, y)) && x > 88, '2', { separacion: 3, inclinacion: 1, rotura: 0.2, semilla: 3 });
+    l.trazos((x, y) => l.color(x, y) === '3' && x > 72 && y > 110, '2', { separacion: 4, inclinacion: 1, rotura: 0.2, semilla: 4 });
+    l.trazos((x, y) => l.color(x, y) === 'c' && x > 76, 'b', { separacion: 3, inclinacion: -1, rotura: 0.2, semilla: 5 });
     // Pliegues de la capucha
-    l.linea(14, 30, 11, 46, '3').linea(50, 30, 53, 46, '2');
+    l.linea(28, 60, 22, 92, '3').linea(29, 60, 23, 92, '5').linea(100, 60, 106, 92, '2').linea(36, 26, 30, 44, '5');
 
     l.entintar('0', { lados: ['abajo', 'derecha'], irregular: 0.25, semilla: 7 });
     return l;
@@ -121,24 +130,26 @@ const EXPRESIONES = {
     },
     // Las luces se abren y el cristal entero se enciende
     sorpresa(l) {
-        l.patron(20, 26, 25, 4, (x, y) => (l.color(x + 20, y + 26) === 'e' ? 'f' : null));
+        l.patron(40, 52, 50, 7, (x, y) => (l.color(x + 40, y + 52) === 'e' ? 'f' : null));
         ojos(l, 'abierta');
     },
     // Cristal rajado y una luz en rojo de fallo
     dolor(l) {
         LUCES.error(l, ...OJOS[0]);
         LUCES.tenue(l, ...OJOS[1]);
-        l.linea(30, 26, 33, 29, '0').punto(34, 29, '1').punto(29, 26, '1');
+        l.linea(60, 52, 66, 58, '0').linea(63, 55, 68, 53, '0').punto(68, 58, '1').punto(59, 52, '1');
     },
     // Luces tenues que miran abajo, a un lado
     perdido(l) {
-        ojos(l, 'tenue', -1, 1);
+        LUCES.tenue(l, OJOS[0][0] - 2, OJOS[0][1] + 1);
+        l.rect(OJOS[1][0] - 2, OJOS[1][1] + 1, 3, 1, 'f');
     }
 };
 
 export default {
     nombre: 'retrato-jugador',
     tipo: 'sprite',
+    hd: true,
     ancho: LADO, alto: LADO,
     frames: () => Object.values(EXPRESIONES).map(expresion => {
         const l = base();

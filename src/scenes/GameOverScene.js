@@ -9,13 +9,13 @@ export default class GameOverScene extends PantallaSuperpuesta {
     }
 
     construir() {
-        this.texto(104, 'HAS MUERTO', COLORES.ROJO, 2);
-        this.texto(130, 'SEÑAL VITAL PERDIDA', COLORES.GRIS);
-        this.menu(154, [
+        this.texto(208, 'HAS MUERTO', COLORES.ROJO, 2);
+        this.texto(260, 'SEÑAL VITAL PERDIDA', COLORES.GRIS);
+        this.menu(308, [
             { texto: 'VOLVER A INTENTARLO', accion: () => this.reintentar() },
             { texto: 'MENU PRINCIPAL', accion: () => this.irAlMenu() }
         ]);
-        this.texto(204, 'W/S ELEGIR   ENTER/E ACEPTAR', COLORES.GRIS_OSCURO);
+        this.texto(408, 'W/S ELEGIR   ENTER/E ACEPTAR', COLORES.GRIS_OSCURO);
     }
 
     reintentar() {

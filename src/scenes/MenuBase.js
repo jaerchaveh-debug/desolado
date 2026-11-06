@@ -20,17 +20,17 @@ export default class MenuBase extends Phaser.Scene {
         return this.add.bitmapText(x, y, 'fuente', cadena).setOrigin(0.5).setScale(escala).setTint(color);
     }
 
-    titulo(cadena, y = 44) {
+    titulo(cadena, y = 88) {
         this.texto(this.cx, y, cadena, COLORES.BLANCO, 2);
-        this.add.rectangle(this.cx, y + 16, 160, 1, COLORES.CIAN_OSCURO);
+        this.add.rectangle(this.cx, y + 32, 320, 2, COLORES.CIAN_OSCURO);
     }
 
     menu(config) {
-        return new MenuOpciones(this, { x: this.cx, separacion: 16, espera: 150, ...config });
+        return new MenuOpciones(this, { x: this.cx, separacion: 32, espera: 150, ...config });
     }
 
     pie(cadena) {
-        this.texto(this.cx, this.alto - 16, cadena, COLORES.GRIS_OSCURO);
+        this.texto(this.cx, this.alto - 32, cadena, COLORES.GRIS_OSCURO);
     }
 
     irA(escena) {

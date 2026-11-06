@@ -24,13 +24,13 @@ export default class ControlesScene extends MenuBase {
         this.titulo('CONTROLES');
 
         CONTROLES.forEach(([accion, teclas], i) => {
-            const y = 72 + i * 13;
-            this.texto(this.cx - 8, y, accion, COLORES.GRIS).setOrigin(1, 0.5);
-            this.texto(this.cx + 8, y, teclas, COLORES.CIAN).setOrigin(0, 0.5);
+            const y = 144 + i * 26;
+            this.texto(this.cx - 16, y, accion, COLORES.GRIS).setOrigin(1, 0.5);
+            this.texto(this.cx + 16, y, teclas, COLORES.CIAN).setOrigin(0, 0.5);
         });
 
         this.menu({
-            y: 196,
+            y: 392,
             opciones: [{ texto: 'VOLVER', accion: () => this.irA('MenuScene') }],
             alVolver: () => this.irA('MenuScene')
         });

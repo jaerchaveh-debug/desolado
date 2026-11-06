@@ -1,56 +1,64 @@
 // Enemigo: robot flotante de casco esférico, ojo rojo y tentáculos negros que ondulan.
-// Mira a la derecha. Frames de 24x24:
+// Mira a la derecha. Frames de 48x48:
 //   0-3 flotar (los tentáculos ondulan)   4-6 morir (destello, rotura, chispas)
 
 import { Lienzo, ruido } from '../tools/pixel/lienzo.js';
 
-const T = 24;
-const CX = 12, CY = 8, RADIO = 7;   // centro y radio del casco
+const T = 48;
+const CX = 24, CY = 16, RADIO = 14;   // centro y radio del casco
 
 function casco(l, i = 0) {
     l.patron(CX - RADIO, CY - RADIO, RADIO * 2 + 1, RADIO * 2 + 1, (x, y) => {
         const dx = x - RADIO, dy = y - RADIO;
-        const d = Math.sqrt(dx * dx + dy * dy);
+        const d = Math.hypot(dx, dy);
         if (d > RADIO + 0.3) return null;
-        if (d > RADIO - 0.7) return '0';                    // contorno
-        if (dy === 2) return '2';                            // junta horizontal del casco
-        const luz = -dy - dx * 0.3;                          // luz desde arriba a la izquierda
-        return luz > 4 ? '7' : luz > 1.5 ? '6' : luz > -1.5 ? '5' : luz > -4 ? '4' : '3';
+        if (d > RADIO - 1) return '0';                       // contorno
+        const luz = -dy - dx * 0.35;                         // luz desde arriba a la izquierda
+        return luz > 9 ? '8' : luz > 6 ? '7' : luz > 2 ? '6' : luz > -2 ? '5' : luz > -7 ? '4' : '3';
     });
-    const dentro = (x, y) => Math.hypot(x - CX, y - CY) < RADIO - 0.7;
-    l.oscurecer((x, y) => x === 10 && y >= 3 && y <= 9 && dentro(x, y));   // junta vertical de placas
-    [13, 16].forEach(x => l.punto(x, 10, '4'));      // remaches de la junta horizontal
-    l.oscurecer((x, y) => y >= 11 && y <= 12 && x >= 8 && x <= 12 && x % 2 === 0, 2);   // rejilla de ventilación
-    l.punto(15, 11, 'b').punto(15, 12, 'a').punto(16, 11, 'a');   // chorreón de óxido bajo la junta
-    // Ojo rojo mirando al frente (derecha); late en los frames 1 y 2 (se enciende la cuenca entera)
-    l.rect(14, 6, 4, 3, '0');
-    l.rect(15, 7, 2, 1, 'j');
-    l.punto(14, 7, 'i');
-    if (i === 1 || i === 2) l.lineaH(14, 7, 3, 'j');
-    l.punto(9, 3, '8').punto(8, 4, '8');                    // brillo especular
+    const dentro = (x, y) => Math.hypot(x - CX, y - CY) < RADIO - 1;
+    // Sombra del lado derecho con trazos
+    l.trazos((x, y) => dentro(x, y) && x + y > 52, '2', { separacion: 3, inclinacion: 1, rotura: 0.25, semilla: 7 });
+    // Juntas de las placas: una horizontal curva y una vertical
+    for (let x = CX - RADIO; x <= CX + RADIO; x++) {
+        const y = CY + 5 + Math.round(((x - CX) / RADIO) ** 2 * -2);
+        if (dentro(x, y)) l.punto(x, y, '1').punto(x, y + 1, '5');
+    }
+    l.oscurecer((x, y) => x === 19 && y >= 4 && y <= 20 && dentro(x, y), 2);
+    l.aclarar((x, y) => x === 20 && y >= 4 && y <= 20 && dentro(x, y));
+    [14, 24, 32].forEach(x => l.punto(x, 23, '7'));           // remaches de la junta
+    // Rejilla de ventilación
+    for (let x = 14; x <= 24; x += 3) l.rect(x, 25, 2, 2, '1').punto(x, 27, '5');
+    // Chorreón de óxido bajo la junta
+    l.lineaV(31, 23, 4, 'b').punto(31, 27, 'a').lineaV(33, 23, 2, 'a').punto(30, 23, 'c');
+    // Ojo rojo mirando al frente (derecha): lente con anillo; late en los frames 1 y 2
+    l.circulo(31, 13, 5, '0').anillo(31, 13, 4, '3');
+    const late = i === 1 || i === 2;
+    l.circulo(31, 13, 3, 'i').circulo(32, 13, 2, late ? 'j' : 'i').rect(32, 12, 2, 2, 'j');
+    if (late) l.punto(33, 12, '9').punto(34, 13, 'j');
+    l.rect(15, 6, 3, 2, '9').punto(14, 8, '9').punto(19, 5, '8');   // brillo especular
     return l;
 }
 
 // Tentáculos negros: 4 curvas que salen de la base del casco, con fase por frame
 function tentaculos(l, fase) {
-    const raices = [7, 10, 14, 17];
+    const raices = [14, 20, 28, 34];
     raices.forEach((x0, k) => {
-        let anterior = null;
-        for (let y = 14; y < T; y++) {
-            const t = y - 14;
-            const amp = 0.4 + t * 0.22;
-            const x = x0 + Math.round(Math.sin(t / 2.2 + fase + k * 1.7) * amp) + (k < 2 ? -Math.floor(t / 4) : Math.floor(t / 4));
-            // Negro metálico ('1') en vez de '0' puro, para que se distingan sobre el fondo negro
-            // segmentos alternos, articulación clara cada 4 px y punta metálica
-            l.punto(x, y, y === T - 1 ? '4' : t % 4 === 3 ? '3' : t % 2 === 0 ? '2' : '1');
-            if (t < 5) l.punto(x - 1, y, '3');               // más gruesos y con borde de luz cerca de la base
-            // rellena saltos horizontales para que la curva sea continua
-            if (anterior !== null && Math.abs(x - anterior) > 1) l.punto((x + anterior) >> 1, y, '1');
-            anterior = x;
+        for (let y = 28; y < T; y++) {
+            const t = (y - 28) / 2;
+            const amp = 0.8 + t * 0.44;
+            const x = x0 + Math.round(Math.sin(t / 2.2 + fase + k * 1.7) * amp) + (k < 2 ? -Math.floor(t / 2) : Math.floor(t / 2));
+            const ancho = y < 34 ? 3 : y < 42 ? 2 : 1;
+            // Negro metálico en vez de '0' puro, para que se distingan sobre el fondo negro
+            const articulacion = (y - 28) % 6 < 2;
+            l.lineaH(x - 1, y, ancho + 1, '0');
+            l.lineaH(x, y, ancho - 1 || 1, articulacion ? '5' : '3');
+            if (articulacion && ancho > 1) l.punto(x, y, '5');
+            if (y === T - 1) l.punto(x, y, '6');
         }
     });
-    l.lineaH(6, 14, 13, '1');                                // anillo de anclaje
-    l.lineaH(7, 15, 11, '0');
+    // Anillo de anclaje
+    l.rect(12, 28, 26, 2, '1').lineaH(14, 28, 22, '3').rect(14, 30, 22, 2, '0');
     return l;
 }
 
@@ -61,7 +69,7 @@ function flotar(i) {
 function destello() {
     const l = flotar(0);
     // el casco se sobreexpone en blanco/cian
-    return l.patron(0, 0, T, 15, (x, y) => l.px[y][x] !== '.' && l.px[y][x] !== '0' ? (ruido(x, y, 3) > 0.5 ? '9' : 'h') : null);
+    return l.patron(0, 0, T, 30, (x, y) => (l.px[y][x] !== '.' && l.px[y][x] !== '0' ? (ruido(x >> 1, y >> 1, 3) > 0.5 ? '9' : 'h') : null));
 }
 
 function rotura() {
@@ -71,26 +79,27 @@ function rotura() {
     for (let y = 0; y < T; y++) {
         for (let x = 0; x < T; x++) {
             const c = base.px[y][x];
-            if (c === '.' || ruido(x >> 2, y >> 2, 5) > 0.6) continue;
-            const dx = Math.sign(x - CX) * 2, dy = Math.sign(y - CY) * 2;
-            l.punto(x + dx, y + dy, c);
+            if (c === '.' || ruido(x >> 3, y >> 3, 5) > 0.6) continue;
+            l.punto(x + Math.sign(x - CX) * 4, y + Math.sign(y - CY) * 4, c);
         }
     }
-    l.rect(11, 7, 3, 2, 'j').punto(12, 7, '9');               // núcleo expuesto
-    return l;
+    return l.rect(22, 14, 6, 4, 'j').rect(23, 14, 2, 2, '9');  // núcleo expuesto
 }
 
 function chispas() {
     const l = new Lienzo(T, T);
-    for (let i = 0; i < 14; i++) {
-        const x = Math.floor(ruido(i, 1, 9) * T), y = Math.floor(ruido(i, 2, 9) * T);
-        l.punto(x, y, ['j', 'h', '5', '0'][i % 4]);
+    for (let i = 0; i < 22; i++) {
+        const x = Math.floor(ruido(i, 1, 9) * (T - 2)), y = Math.floor(ruido(i, 2, 9) * (T - 2));
+        const c = ['j', 'h', '5', '3'][i % 4];
+        l.punto(x, y, c).punto(x + 1, y, c);
+        if (i % 3 === 0) l.punto(x, y + 1, c);
     }
     return l;
 }
 
 export default {
     nombre: 'robot-tentaculos',
+    hd: true,
     ancho: T,
     alto: T,
     frames: () => [flotar(0), flotar(1), flotar(2), flotar(3), destello(), rotura(), chispas()],

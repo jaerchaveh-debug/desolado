@@ -34,8 +34,8 @@ export default class Proyectil extends Phaser.Physics.Arcade.Sprite {
             ancho = vertical ? ataque.cuerpo.alto : ataque.cuerpo.ancho;
             alto = vertical ? ataque.cuerpo.ancho : ataque.cuerpo.alto;
         } else {
-            ancho = direccion.y === 0 ? 6 : direccion.x === 0 ? 2 : 4;
-            alto = direccion.y === 0 ? 2 : direccion.x === 0 ? 6 : 4;
+            ancho = direccion.y === 0 ? 12 : direccion.x === 0 ? 4 : 8;
+            alto = direccion.y === 0 ? 4 : direccion.x === 0 ? 12 : 8;
         }
         this.body.setSize(ancho, alto).setOffset((this.width - ancho) / 2, (this.height - alto) / 2);
         this.setDepth(10);

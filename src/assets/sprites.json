@@ -1,10 +1,11 @@
 {
   "jugador": {
     "archivo": "assets/sprites/jugador.png",
-    "ancho": 16,
-    "alto": 32,
+    "ancho": 32,
+    "alto": 64,
     "frames": 84,
     "tipo": "sprite",
+    "ampliado": false,
     "animaciones": {
       "quieto": {
         "frames": [
@@ -36,10 +37,11 @@
   },
   "tiles-pasillo": {
     "archivo": "assets/sprites/tiles-pasillo.png",
-    "ancho": 16,
-    "alto": 16,
-    "frames": 40,
+    "ancho": 32,
+    "alto": 32,
+    "frames": 44,
     "tipo": "tileset",
+    "ampliado": false,
     "animaciones": {},
     "propiedades": {
       "0": {
@@ -83,24 +85,38 @@
       },
       "18": {
         "soloArriba": true
+      },
+      "40": {
+        "solido": true
+      },
+      "41": {
+        "solido": true
+      },
+      "42": {
+        "solido": true
+      },
+      "43": {
+        "solido": true
       }
     }
   },
   "proyectil": {
     "archivo": "assets/sprites/proyectil.png",
-    "ancho": 8,
-    "alto": 8,
+    "ancho": 16,
+    "alto": 16,
     "frames": 3,
     "tipo": "sprite",
+    "ampliado": false,
     "animaciones": {},
     "propiedades": {}
   },
   "robot-tentaculos": {
     "archivo": "assets/sprites/robot-tentaculos.png",
-    "ancho": 24,
-    "alto": 24,
+    "ancho": 48,
+    "alto": 48,
     "frames": 7,
     "tipo": "sprite",
+    "ampliado": false,
     "animaciones": {
       "flotar": {
         "frames": [
@@ -126,29 +142,32 @@
   },
   "hud-vida": {
     "archivo": "assets/sprites/hud-vida.png",
-    "ancho": 8,
-    "alto": 8,
+    "ancho": 16,
+    "alto": 16,
     "frames": 2,
     "tipo": "sprite",
+    "ampliado": false,
     "animaciones": {},
     "propiedades": {}
   },
   "fuente": {
     "archivo": "assets/sprites/fuente.png",
-    "ancho": 6,
-    "alto": 8,
+    "ancho": 12,
+    "alto": 16,
     "frames": 86,
     "tipo": "fuente",
+    "ampliado": false,
     "animaciones": {},
     "propiedades": {},
     "caracteres": "0123456789 ABCDEFGHIJKLMNÑOPQRSTUVWXYZ.,:!?-/>ÁÉÍÓÚ¡¿abcdefghijklmnñopqrstuvwxyzáéíóúü"
   },
   "robot-cuchillas": {
     "archivo": "assets/sprites/robot-cuchillas.png",
-    "ancho": 32,
-    "alto": 24,
+    "ancho": 64,
+    "alto": 48,
     "frames": 10,
     "tipo": "sprite",
+    "ampliado": false,
     "animaciones": {
       "caminar": {
         "frames": [
@@ -185,10 +204,11 @@
   },
   "escopeta": {
     "archivo": "assets/sprites/escopeta.png",
-    "ancho": 192,
-    "alto": 32,
+    "ancho": 384,
+    "alto": 64,
     "frames": 3,
     "tipo": "sprite",
+    "ampliado": false,
     "animaciones": {
       "disparo": {
         "frames": [
@@ -204,19 +224,21 @@
   },
   "hud-escopeta": {
     "archivo": "assets/sprites/hud-escopeta.png",
-    "ancho": 16,
-    "alto": 16,
+    "ancho": 32,
+    "alto": 32,
     "frames": 2,
     "tipo": "sprite",
+    "ampliado": false,
     "animaciones": {},
     "propiedades": {}
   },
   "carga-espada": {
     "archivo": "assets/sprites/carga-espada.png",
-    "ancho": 32,
-    "alto": 32,
+    "ancho": 64,
+    "alto": 64,
     "frames": 4,
     "tipo": "sprite",
+    "ampliado": false,
     "animaciones": {
       "cargar": {
         "frames": [
@@ -233,28 +255,31 @@
   },
   "espada": {
     "archivo": "assets/sprites/espada.png",
-    "ancho": 20,
-    "alto": 7,
+    "ancho": 40,
+    "alto": 14,
     "frames": 2,
     "tipo": "sprite",
+    "ampliado": false,
     "animaciones": {},
     "propiedades": {}
   },
   "hud-espada": {
     "archivo": "assets/sprites/hud-espada.png",
-    "ancho": 16,
-    "alto": 16,
+    "ancho": 32,
+    "alto": 32,
     "frames": 2,
     "tipo": "sprite",
+    "ampliado": false,
     "animaciones": {},
     "propiedades": {}
   },
   "onda-espada": {
     "archivo": "assets/sprites/onda-espada.png",
-    "ancho": 16,
-    "alto": 32,
+    "ancho": 32,
+    "alto": 64,
     "frames": 2,
     "tipo": "sprite",
+    "ampliado": false,
     "animaciones": {
       "viajar": {
         "frames": [
@@ -269,10 +294,11 @@
   },
   "tajo-espada": {
     "archivo": "assets/sprites/tajo-espada.png",
-    "ancho": 80,
-    "alto": 32,
+    "ancho": 160,
+    "alto": 64,
     "frames": 3,
     "tipo": "sprite",
+    "ampliado": false,
     "animaciones": {
       "disparo": {
         "frames": [
@@ -288,46 +314,51 @@
   },
   "luz-fondo": {
     "archivo": "assets/sprites/luz-fondo.png",
-    "ancho": 8,
-    "alto": 8,
+    "ancho": 16,
+    "alto": 16,
     "frames": 3,
     "tipo": "sprite",
+    "ampliado": false,
     "animaciones": {},
     "propiedades": {}
   },
   "mira": {
     "archivo": "assets/sprites/mira.png",
-    "ancho": 9,
-    "alto": 9,
+    "ancho": 19,
+    "alto": 19,
     "frames": 1,
     "tipo": "sprite",
+    "ampliado": false,
     "animaciones": {},
     "propiedades": {}
   },
   "puerta-metal": {
     "archivo": "assets/sprites/puerta-metal.png",
-    "ancho": 16,
-    "alto": 64,
+    "ancho": 32,
+    "alto": 128,
     "frames": 5,
     "tipo": "sprite",
+    "ampliado": false,
     "animaciones": {},
     "propiedades": {}
   },
   "chatarra": {
     "archivo": "assets/sprites/chatarra.png",
-    "ancho": 6,
-    "alto": 6,
+    "ancho": 12,
+    "alto": 12,
     "frames": 3,
     "tipo": "sprite",
+    "ampliado": false,
     "animaciones": {},
     "propiedades": {}
   },
   "jefe-estibador": {
     "archivo": "assets/sprites/jefe-estibador.png",
-    "ancho": 48,
-    "alto": 64,
+    "ancho": 96,
+    "alto": 128,
     "frames": 16,
     "tipo": "sprite",
+    "ampliado": false,
     "animaciones": {
       "caminar": {
         "frames": [
@@ -401,10 +432,11 @@
   },
   "bola-energia": {
     "archivo": "assets/sprites/bola-energia.png",
-    "ancho": 8,
-    "alto": 8,
+    "ancho": 16,
+    "alto": 16,
     "frames": 2,
     "tipo": "sprite",
+    "ampliado": false,
     "animaciones": {
       "viajar": {
         "frames": [
@@ -419,19 +451,21 @@
   },
   "rayo-jefe": {
     "archivo": "assets/sprites/rayo-jefe.png",
-    "ancho": 16,
-    "alto": 8,
+    "ancho": 32,
+    "alto": 16,
     "frames": 3,
     "tipo": "sprite",
+    "ampliado": false,
     "animaciones": {},
     "propiedades": {}
   },
   "onda-jefe": {
     "archivo": "assets/sprites/onda-jefe.png",
-    "ancho": 192,
-    "alto": 192,
+    "ancho": 384,
+    "alto": 384,
     "frames": 3,
     "tipo": "sprite",
+    "ampliado": false,
     "animaciones": {
       "descargar": {
         "frames": [
@@ -446,19 +480,21 @@
   },
   "barra-jefe": {
     "archivo": "assets/sprites/barra-jefe.png",
-    "ancho": 160,
-    "alto": 6,
+    "ancho": 320,
+    "alto": 12,
     "frames": 2,
     "tipo": "sprite",
+    "ampliado": false,
     "animaciones": {},
     "propiedades": {}
   },
   "celula-vida": {
     "archivo": "assets/sprites/celula-vida.png",
-    "ancho": 8,
-    "alto": 8,
+    "ancho": 16,
+    "alto": 16,
     "frames": 2,
     "tipo": "sprite",
+    "ampliado": false,
     "animaciones": {
       "brillar": {
         "frames": [
@@ -473,28 +509,31 @@
   },
   "fondo-lejano": {
     "archivo": "assets/sprites/fondo-lejano.png",
-    "ancho": 512,
-    "alto": 256,
+    "ancho": 1024,
+    "alto": 512,
     "frames": 1,
     "tipo": "sprite",
+    "ampliado": false,
     "animaciones": {},
     "propiedades": {}
   },
   "fondo-medio": {
     "archivo": "assets/sprites/fondo-medio.png",
-    "ancho": 640,
-    "alto": 256,
+    "ancho": 1280,
+    "alto": 512,
     "frames": 1,
     "tipo": "sprite",
+    "ampliado": false,
     "animaciones": {},
     "propiedades": {}
   },
   "terminal-control": {
     "archivo": "assets/sprites/terminal-control.png",
-    "ancho": 16,
-    "alto": 32,
+    "ancho": 32,
+    "alto": 64,
     "frames": 3,
     "tipo": "sprite",
+    "ampliado": false,
     "animaciones": {
       "activa": {
         "frames": [
@@ -509,37 +548,41 @@
   },
   "retrato-jugador": {
     "archivo": "assets/sprites/retrato-jugador.png",
-    "ancho": 64,
-    "alto": 64,
+    "ancho": 128,
+    "alto": 128,
     "frames": 4,
     "tipo": "sprite",
+    "ampliado": false,
     "animaciones": {},
     "propiedades": {}
   },
   "icono-pistola": {
     "archivo": "assets/sprites/icono-pistola.png",
-    "ancho": 32,
-    "alto": 32,
+    "ancho": 64,
+    "alto": 64,
     "frames": 1,
     "tipo": "sprite",
+    "ampliado": false,
     "animaciones": {},
     "propiedades": {}
   },
   "icono-espada": {
     "archivo": "assets/sprites/icono-espada.png",
-    "ancho": 32,
-    "alto": 32,
+    "ancho": 64,
+    "alto": 64,
     "frames": 1,
     "tipo": "sprite",
+    "ampliado": false,
     "animaciones": {},
     "propiedades": {}
   },
   "figura-jugador": {
     "archivo": "assets/sprites/figura-jugador.png",
-    "ancho": 80,
-    "alto": 128,
+    "ancho": 160,
+    "alto": 256,
     "frames": 16,
     "tipo": "sprite",
+    "ampliado": false,
     "animaciones": {
       "quieto": {
         "frames": [
@@ -564,6 +607,16 @@
         "repetir": -1
       }
     },
+    "propiedades": {}
+  },
+  "ficha-estibador": {
+    "archivo": "assets/sprites/ficha-estibador.png",
+    "ancho": 96,
+    "alto": 128,
+    "frames": 1,
+    "tipo": "sprite",
+    "ampliado": false,
+    "animaciones": {},
     "propiedades": {}
   }
 }

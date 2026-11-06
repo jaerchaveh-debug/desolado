@@ -1,52 +1,57 @@
-// Terminal del punto de control (16x32, apoyada en el suelo). Se activa al pasar el jugador por delante.
+// Terminal del punto de control (32x64, apoyada en el suelo). Se activa al pasar el jugador por delante.
 // Frames: 0 inactiva (pantalla negra, piloto de óxido) · 1-2 activa (pantalla cian con barrido, piloto cian)
 // Animación 'activa' (frames 1-2) en bucle; GameScene muestra el frame 0 hasta activarla.
 
 import { Lienzo } from '../tools/pixel/lienzo.js';
 
-const ANCHO = 16;
-const ALTO = 32;
+const ANCHO = 32;
+const ALTO = 64;
 
 // Carcasa: cabezal inclinado con la pantalla, columna con cables y peana atornillada al suelo
 function carcasa() {
     const l = new Lienzo(ANCHO, ALTO);
-    // Cabezal: tapa inclinada en dos tramos de 6 px
-    l.rect(2, 3, 12, 11, '4');
-    l.lineaH(2, 3, 6, '6').lineaH(8, 2, 6, '6').lineaH(8, 3, 6, '5');  // canto superior iluminado
-    l.lineaH(2, 4, 6, '5');
-    l.lineaH(2, 13, 12, '2').lineaV(13, 3, 10, '3');
-    // Columna
-    l.rect(6, 14, 4, 13, '3').lineaV(6, 14, 13, '4').lineaV(9, 14, 13, '2');
-    l.rect(5, 14, 6, 1, '2');                                         // cuello bajo el cabezal
-    l.lineaV(11, 15, 11, '2').punto(11, 20, 'b').punto(11, 24, 'b');  // cable con abrazaderas de óxido
-    // Peana
-    l.rect(3, 27, 10, 5, '3').lineaH(3, 27, 10, '5').lineaH(3, 31, 10, '2');
-    l.punto(4, 29, '6').punto(11, 29, '6');                           // pernos
+    // Cabezal: tapa inclinada
+    l.poligono([[4, 8], [16, 5], [28, 4], [28, 28], [4, 28]], '4');
+    l.linea(4, 7, 16, 4, '7').linea(16, 4, 28, 3, '7').linea(4, 8, 16, 5, '6').linea(16, 5, 28, 4, '6');   // canto superior iluminado
+    l.rect(4, 26, 24, 2, '2').rect(26, 6, 2, 20, '3');
+    l.trazos((x, y) => l.color(x, y) === '4' && x > 20 && y > 22, '3', { separacion: 2, inclinacion: 1, rotura: 0.2, semilla: 3 });
+    // Columna con refuerzos
+    l.rect(12, 28, 8, 26, '3').rect(12, 28, 2, 26, '5').rect(18, 28, 2, 26, '2');
+    l.rect(10, 28, 12, 2, '2').lineaH(10, 28, 12, '4');
+    for (let y = 34; y < 52; y += 6) l.lineaH(14, y, 4, '2');
+    // Cable con abrazaderas de óxido
+    l.cable(22, 30, 24, 53, '2', 1).rect(21, 40, 3, 2, 'b').rect(22, 48, 3, 2, 'b').punto(21, 40, 'c').punto(22, 48, 'c');
+    // Peana atornillada
+    l.poligono([[6, 54], [26, 54], [28, 63], [4, 63]], '3');
+    l.lineaH(6, 54, 20, '6').lineaH(6, 55, 20, '5').lineaH(4, 62, 24, '2');
+    for (const x of [8, 22]) l.rect(x, 58, 3, 3, '5').punto(x, 58, '8').punto(x + 2, 60, '1');
     return l.contorno('0');
 }
 
 // Pantalla (hueco del cabezal) y piloto en la columna
 function terminal(pantalla, piloto, barrido) {
     const l = carcasa();
-    l.rect(4, 6, 8, 6, '0');
+    l.rect(7, 11, 18, 13, '0').marco(6, 10, 20, 15, '2');
     if (pantalla) {
-        l.rect(4, 6, 8, 6, 'e');
-        l.lineaH(5, 7, 5, 'f').lineaH(5, 9, 6, 'f').lineaH(5, 10, 3, 'f');   // líneas de texto ilegibles
-        l.lineaH(4, barrido, 8, 'g');                                        // barrido de refresco
-        l.punto(10, 7, 'h');
+        l.rect(8, 12, 16, 11, 'e');
+        // Líneas de texto ilegibles
+        l.lineaH(10, 14, 9, 'f').lineaH(10, 16, 11, 'f').lineaH(10, 18, 6, 'f').lineaH(10, 20, 8, 'f');
+        l.rect(8, barrido, 16, 2, 'g').lineaH(8, barrido, 16, 'h');   // barrido de refresco
+        l.rect(21, 14, 2, 2, 'h');
     }
-    l.rect(7, 18, 2, 2, piloto);
+    l.rect(14, 36, 4, 4, '0').rect(15, 37, 2, 2, piloto);
     return l;
 }
 
 export default {
     nombre: 'terminal-control',
+    hd: true,
     ancho: ANCHO,
     alto: ALTO,
     frames: () => [
         terminal(false, 'd', 0),   // piloto de óxido: sin señal (el rojo queda para el peligro)
-        terminal(true, 'g', 8),
-        terminal(true, 'f', 10)
+        terminal(true, 'g', 15),
+        terminal(true, 'f', 19)
     ],
     animaciones: {
         activa: { frames: [1, 2], fps: 3, repetir: -1 }

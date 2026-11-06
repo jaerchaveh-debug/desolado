@@ -4,8 +4,9 @@
 //   npm run arte:revisar ruta/a/img.png  -> revisa un archivo concreto
 //
 // Comprueba: colores fuera de la paleta, alfa parcial (suavizado),
-// dimensiones que no encajan con el manifiesto o con la rejilla de 16 px,
-// y sprites ampliados (bloques de píxeles repetidos).
+// dimensiones que no encajan con el manifiesto o con la rejilla de 32 px,
+// y sprites ampliados (bloques de píxeles repetidos), salvo el arte marcado como
+// `ampliado` en el manifiesto, que aún está pendiente de redibujar a 960x540.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -14,7 +15,7 @@ import { RGB_A_CARACTER } from './paleta.js';
 
 const RAIZ = path.resolve(import.meta.dirname, '../..');
 const MANIFIESTO = path.join(RAIZ, 'src/assets/sprites.json');
-const REJILLA = 16;
+const REJILLA = 32;
 
 function buscarPNG(dir) {
     if (!fs.existsSync(dir)) return [];
@@ -72,10 +73,10 @@ function revisar(archivo, manifiesto) {
     }
     if (opacos === ancho * alto) problemas.push('sin transparencia: el fondo debe ser transparente (salvo tiles de relleno)');
 
-    const n = factorAmpliacion(ancho, alto, rgba);
-    if (n > 1) problemas.push(`parece ampliado x${n}: exportar a tamaño nativo`);
-
     const entrada = Object.values(manifiesto).find(m => rel.endsWith(m.archivo));
+    const n = factorAmpliacion(ancho, alto, rgba);
+    if (n > 1 && !entrada?.ampliado) problemas.push(`parece ampliado x${n}: exportar a tamaño nativo`);
+
     if (entrada) {
         if (alto !== entrada.alto || ancho !== entrada.ancho * entrada.frames) {
             problemas.push(`mide ${ancho}x${alto}, el manifiesto espera ${entrada.ancho * entrada.frames}x${entrada.alto}`);

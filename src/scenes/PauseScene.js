@@ -12,13 +12,13 @@ export default class PauseScene extends PantallaSuperpuesta {
     }
 
     construir() {
-        const titulo = this.texto(104, 'CONEXION PERDIDA', COLORES.CIAN, 2);
-        this.texto(130, 'ENLACE CON EL SISTEMA INTERRUMPIDO', COLORES.GRIS);
-        const menu = this.menu(154, [
+        const titulo = this.texto(208, 'CONEXION PERDIDA', COLORES.CIAN, 2);
+        this.texto(260, 'ENLACE CON EL SISTEMA INTERRUMPIDO', COLORES.GRIS);
+        const menu = this.menu(308, [
             { texto: 'RECONECTAR', accion: () => this.reconectar() },
             { texto: 'SALIR AL MENU', accion: () => this.irAlMenu() }
         ]);
-        this.texto(204, 'V RECONECTAR   W/S ELEGIR   ENTER/E ACEPTAR', COLORES.GRIS_OSCURO);
+        this.texto(408, 'V RECONECTAR   W/S ELEGIR   ENTER/E ACEPTAR', COLORES.GRIS_OSCURO);
 
         this.time.delayedCall(this.espera, () => {
             this.input.keyboard.on('keydown-V', () => {

@@ -6,8 +6,12 @@
 // Salidas:
 //   public/assets/sprites/<nombre>.png   hoja de sprites horizontal a tamaño nativo
 //   src/assets/sprites.json              manifiesto que lee PreloadScene
-//   arte/preview/<nombre>.png            vista ampliada x8 sobre fondo neutro (solo para revisar)
+//   arte/preview/<nombre>.png            vista ampliada x4 sobre fondo neutro (solo para revisar)
 //   public/assets/sprites/<nombre>.tsj   (solo tilesets) tileset de Tiled para editar niveles
+//
+// El juego va a 960x540. Las definiciones con `hd: true` se dibujan ya a ese tamaño; las demás son
+// arte antiguo pensado para 480x270 y se amplían x2 con Scale2x (quedan como `ampliado` en el
+// manifiesto: es la lista de lo que falta por redibujar).
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -21,7 +25,7 @@ const DIR_SALIDA = path.join(RAIZ, 'public/assets/sprites');
 const DIR_PREVIEW = path.join(DIR_ARTE, 'preview');
 const MANIFIESTO = path.join(RAIZ, 'src/assets/sprites.json');
 
-const ESCALA_PREVIEW = 8;
+const ESCALA_PREVIEW = 4;
 const FONDO_PREVIEW = [58, 58, 64];
 const SEPARACION_PREVIEW = 2; // píxeles nativos entre frames en la vista previa
 
@@ -41,16 +45,16 @@ function preview(lienzo) {
 
 // Tileset en formato Tiled (JSON) para abrirlo desde el editor Tiled.
 // Phaser no admite tilesets externos: al guardar el mapa, Tiled debe incrustarlo.
-function tilesetTiled(def, n) {
+function tilesetTiled(def, ancho, alto, n) {
     const tipoValor = v => typeof v === 'boolean' ? 'bool' : typeof v === 'number' ? 'float' : 'string';
     return {
         type: 'tileset',
         name: def.nombre,
         image: `${def.nombre}.png`,
-        imagewidth: def.ancho * n,
-        imageheight: def.alto,
-        tilewidth: def.ancho,
-        tileheight: def.alto,
+        imagewidth: ancho * n,
+        imageheight: alto,
+        tilewidth: ancho,
+        tileheight: alto,
         tilecount: n,
         columns: n,
         margin: 0,
@@ -64,14 +68,17 @@ function tilesetTiled(def, n) {
 
 async function generar(archivo) {
     const def = (await import(pathToFileURL(archivo).href)).default;
-    const { nombre, ancho, alto } = def;
-    const frames = def.frames();
+    const { nombre } = def;
+    const originales = def.frames();
 
-    frames.forEach((f, i) => {
-        if (!(f instanceof Lienzo) || f.ancho !== ancho || f.alto !== alto) {
-            throw new Error(`${nombre}: el frame ${i} no es un Lienzo de ${ancho}x${alto}`);
+    originales.forEach((f, i) => {
+        if (!(f instanceof Lienzo) || f.ancho !== def.ancho || f.alto !== def.alto) {
+            throw new Error(`${nombre}: el frame ${i} no es un Lienzo de ${def.ancho}x${def.alto}`);
         }
     });
+
+    const frames = def.hd ? originales : originales.map(f => f.ampliado());
+    const ancho = frames[0].ancho, alto = frames[0].alto;
 
     const h = hoja(frames, ancho, alto);
     const { rgba } = h.aRGBA();
@@ -79,7 +86,7 @@ async function generar(archivo) {
     fs.writeFileSync(path.join(DIR_PREVIEW, `${nombre}.png`), preview(hoja(frames, ancho, alto, SEPARACION_PREVIEW)));
 
     if (def.tipo === 'tileset') {
-        fs.writeFileSync(path.join(DIR_SALIDA, `${nombre}.tsj`), JSON.stringify(tilesetTiled(def, frames.length), null, 2) + '\n');
+        fs.writeFileSync(path.join(DIR_SALIDA, `${nombre}.tsj`), JSON.stringify(tilesetTiled(def, ancho, alto, frames.length), null, 2) + '\n');
     }
 
     console.log(`✓ ${nombre}: ${frames.length} frame(s) de ${ancho}x${alto}`);
@@ -90,6 +97,7 @@ async function generar(archivo) {
         alto,
         frames: frames.length,
         tipo: def.tipo ?? 'sprite',
+        ampliado: !def.hd,
         animaciones: def.animaciones ?? {},
         propiedades: def.propiedades ?? {},
         caracteres: def.caracteres   // solo fuentes (se omite en el JSON si no existe)

@@ -10,19 +10,19 @@ import Puerta from '../objetos/Puerta';
 import Jefe, { EVENTO_JEFE_DERROTADO } from '../objetos/Jefe';
 import { crearParallax } from '../ambiente/parallax';
 
-const VELOCIDAD = 120;
-const SALTO = -330;
+const VELOCIDAD = 240;
+const SALTO = -660;
 // Hacia dónde apunta el jugador, respecto al centro del sprite mirando a la derecha:
 //   boca: boca del cañón de la pistola · mano: puño donde se coloca un arma de 'pose: mano' (la espada)
 //   angulo: grados del arma en la mano (0 = al frente)
 const APUNTAR = {
-    frente:   { boca: { x: 7, y: -2 },  mano: { x: 4, y: -2 },  angulo: 0 },
-    arriba:   { boca: { x: 6, y: -15 }, mano: { x: 5, y: -10 }, angulo: -90 },
-    diagonal: { boca: { x: 7, y: -12 }, mano: { x: 4, y: -8 },  angulo: -45 },
+    frente:   { boca: { x: 15, y: -6 },  mano: { x: 7, y: -5 },   angulo: 0 },
+    arriba:   { boca: { x: 7, y: -26 },  mano: { x: 8, y: -20 },  angulo: -90 },
+    diagonal: { boca: { x: 14, y: -19 }, mano: { x: 8, y: -13 },  angulo: -45 },
     // Solo con el ratón y con pistola (las armas de mano no tienen pose hacia abajo)
-    diagonalAbajo: { boca: { x: 7, y: 4 }, mano: { x: 4, y: -2 }, angulo: 45 },
+    diagonalAbajo: { boca: { x: 13, y: 6 }, mano: { x: 7, y: -5 }, angulo: 45 },
     // Arma en reposo (solo armas de 'pose: mano'): cuelga hacia abajo e inclinada hacia atrás, como si pesara
-    reposo:   { boca: { x: 7, y: -2 },  mano: { x: 1, y: 1 },   angulo: 118 }
+    reposo:   { boca: { x: 15, y: -6 },  mano: { x: -1, y: 5 },  angulo: 118 }
 };
 // Bloque de frames del brazo según la pose del arma (ver arte/jugador.js). Con pistola, el bloque +1 es el retroceso.
 const BLOQUES = {
@@ -38,7 +38,7 @@ const FRAME_ARMA_CARGANDO = 1;
 const BALANCEO_REPOSO = 5;
 const FRAMES_LUZ = { cian: 1, roja: 2 };
 // px alrededor de la cámara que todavía cuentan como "dentro de la vista" al reubicar enemigos
-const MARGEN_VISTA = 24;
+const MARGEN_VISTA = 48;
 const FRAMES_POR_BLOQUE = 7;
 const FRAME_DESTELLO = 1;
 // Animación de disparo: durante este tiempo se muestra la variante con el brazo en retroceso
@@ -53,19 +53,19 @@ const POSE_RATON = 200;
 // Estela del dash: una silueta cian cada tantos ms
 const ESTELA_DASH = 25;
 // px que hay que adentrarse en la sala del jefe para que se cierre la compuerta
-const ENTRADA_SALA = 64;
+const ENTRADA_SALA = 128;
 const VOLUMEN_MUSICA = 0.5;
 // Ambiente del capítulo (ruido industrial en bucle bajo la música); se multiplica por su 'volumen' del manifiesto
 const VOLUMEN_AMBIENTE = 0.8;
 // ms desde la derrota del jefe hasta la pantalla de capítulo completado
 const ESPERA_VICTORIA = 3000;
 // Punto de control: px a la izquierda de la terminal donde reaparece el jugador, y cuánto se ve el aviso
-const REAPARICION_CONTROL = 20;
+const REAPARICION_CONTROL = 40;
 const AVISO_CONTROL = 2200;
 // ms tras abrirse la compuerta de una emboscada hasta su diálogo de salida (la compuerta tarda 900 en subir)
 const ESPERA_DIALOGO_COMPUERTA = 1000;
 // Emboscadas: px mínimos entre el jugador y un punto de aparición
-const DISTANCIA_EMBOSCADA = 48;
+const DISTANCIA_EMBOSCADA = 96;
 const FRAME_VIDA_LLENA = 0;
 const FRAME_VIDA_VACIA = 1;
 const FRAME_ICONO_CARGADO = 0;
@@ -125,12 +125,12 @@ export default class GameScene extends Phaser.Scene {
         const inicio = mapa.findObject('objetos', o => o.name === 'inicio');
         this.puntoControl = mapa.findObject('objetos', o => o.name === 'control');
         this.inicio = this.datos.control && this.puntoControl
-            ? { x: this.puntoControl.x - REAPARICION_CONTROL, y: this.puntoControl.y - 16 }
-            : { x: inicio.x, y: inicio.y - 16 };
+            ? { x: this.puntoControl.x - REAPARICION_CONTROL, y: this.puntoControl.y - 32 }
+            : { x: inicio.x, y: inicio.y - 32 };
 
         this.player = this.physics.add.sprite(this.inicio.x, this.inicio.y, 'jugador');
-        // Hitbox ajustada al cuerpo (el frame de 16x32 tiene margen transparente)
-        this.player.body.setSize(8, 29).setOffset(4, 3);
+        // Hitbox ajustada al cuerpo (el frame de 32x64 tiene margen transparente)
+        this.player.body.setSize(16, 58).setOffset(8, 6);
         this.player.setCollideWorldBounds(true);
         this.player.play('jugador-quieto');
         this.player.setDepth(10);
@@ -150,7 +150,7 @@ export default class GameScene extends Phaser.Scene {
         const cam = this.cameras.main;
         cam.setBounds(0, 0, mapa.widthInPixels, mapa.heightInPixels);
         cam.startFollow(this.player, true, 0.1, 0.1);
-        cam.setDeadzone(64, 48);
+        cam.setDeadzone(128, 96);
 
         this.crearCombate(mapa);
         this.crearHud();
@@ -258,7 +258,7 @@ export default class GameScene extends Phaser.Scene {
     direccionRaton() {
         const p = this.input.activePointer.positionToCamera(this.cameras.main);
         const dx = p.x - this.player.x;
-        let dy = p.y - (this.player.y - 6);
+        let dy = p.y - (this.player.y - 12);
         if (this.arma.pose !== 'pistola') dy = Math.min(0, dy);
         else dy = Math.min(dy, Math.abs(dx) * Math.tan(Phaser.Math.DegToRad(ABAJO_MAXIMO)));
         const largo = Math.hypot(dx, dy);
@@ -395,7 +395,7 @@ export default class GameScene extends Phaser.Scene {
         return Array.from({ length: n }, (_, i) => {
             const p = puntos[i % puntos.length];
             if (i < puntos.length) return p;
-            return { x: p.x + Phaser.Math.Between(-12, 12), y: vuela ? p.y + Phaser.Math.Between(-12, 12) : p.y };
+            return { x: p.x + Phaser.Math.Between(-24, 24), y: vuela ? p.y + Phaser.Math.Between(-24, 24) : p.y };
         });
     }
 
@@ -426,7 +426,7 @@ export default class GameScene extends Phaser.Scene {
     comprobarEmboscadas() {
         if (this.emboscada || !this.player.body.blocked.down) return;
         const e = this.emboscadas.find(e => !e.hecha && e.zona.contains(this.player.x, this.player.body.bottom)
-            && this.player.body.bottom >= e.zona.bottom - 2);
+            && this.player.body.bottom >= e.zona.bottom - 4);
         if (!e) return;
         // Primero el diálogo de llegada (si lo hay); la alarma salta al cerrarlo
         e.hecha = true;
@@ -441,7 +441,7 @@ export default class GameScene extends Phaser.Scene {
         for (const enemigo of this.enemigos.getChildren()) enemigo.retirar();
         sonar(this, 'alarma-emboscada');
         this.cameras.main.shake(250, 0.006);
-        const aviso = this.add.bitmapText(this.scale.width / 2, 48, 'fuente', 'ALERTA: INTRUSO DETECTADO')
+        const aviso = this.add.bitmapText(this.scale.width / 2, 96, 'fuente', 'ALERTA: INTRUSO DETECTADO')
             .setOrigin(0.5).setScrollFactor(0).setDepth(100).setTint(0xb3262a);
         // Parpadea como una alarma y se apaga
         this.tweens.add({ targets: aviso, alpha: 0.2, duration: 180, yoyo: true, repeat: 5, onComplete: () => aviso.destroy() });
@@ -528,7 +528,7 @@ export default class GameScene extends Phaser.Scene {
         this.datos.control = this.puntoControl.name;
         this.terminal.play('terminal-control-activa');
         sonar(this, 'control-activar', { x: this.terminal.x });
-        const aviso = this.add.bitmapText(this.scale.width / 2, 48, 'fuente', 'SEÑAL REGISTRADA')
+        const aviso = this.add.bitmapText(this.scale.width / 2, 96, 'fuente', 'SEÑAL REGISTRADA')
             .setOrigin(0.5).setScrollFactor(0).setDepth(100).setTint(0x47c2c9).setAlpha(0);
         this.tweens.add({ targets: aviso, alpha: 1, duration: 200, yoyo: true, hold: AVISO_CONTROL, onComplete: () => aviso.destroy() });
     }
@@ -610,7 +610,7 @@ export default class GameScene extends Phaser.Scene {
     iniciarJefe() {
         if (this.muerto) return;
         const datos = this.capitulo.jefe;
-        this.jefe = new Jefe(this, this.puntoJefe.x, this.salaJefe.y + 64, datos.tipo, this.player);
+        this.jefe = new Jefe(this, this.puntoJefe.x, this.salaJefe.y + 128, datos.tipo, this.player);
         // Solo choca con tiles sólidos: atraviesa las plataformas colgantes, pero sube a las cajas
         this.physics.add.collider(this.jefe, this.nivel, null, (jefe, tile) => tile.collideDown);
         this.physics.add.overlap(this.jefe, this.balas, (jefe, bala) => {
@@ -633,11 +633,11 @@ export default class GameScene extends Phaser.Scene {
 
     mostrarHudJefe() {
         const { width: w } = this.scale;
-        const ancho = 160, x = Math.round((w - ancho) / 2), y = 8;
+        const ancho = 320, x = Math.round((w - ancho) / 2), y = 16;
         const hud = o => o.setOrigin(0).setScrollFactor(0).setDepth(100).setAlpha(0);
         this.barraJefeFondo = hud(this.add.image(x, y, 'barra-jefe', 1));
         this.barraJefe = hud(this.add.image(x, y, 'barra-jefe', 0));
-        this.nombreJefe = hud(this.add.bitmapText(w / 2, y + 9, 'fuente', JEFES[this.capitulo.jefe.tipo].nombre))
+        this.nombreJefe = hud(this.add.bitmapText(w / 2, y + 18, 'fuente', JEFES[this.capitulo.jefe.tipo].nombre))
             .setOrigin(0.5, 0).setTint(0x8794a6);
         this.tweens.add({ targets: [this.barraJefeFondo, this.barraJefe, this.nombreJefe], alpha: 1, duration: 600 });
         this.actualizarHudJefe();
@@ -680,8 +680,8 @@ export default class GameScene extends Phaser.Scene {
         if (Math.random() >= CURACION.probabilidad) return;
         const { x, y } = enemigo.body.center;
         const celula = this.celulas.create(x, y, 'celula-vida').setDepth(9).play('celula-vida-brillar');
-        celula.body.setSize(6, 7).setBounce(0.3).setDrag(240, 0);
-        celula.setVelocity(Phaser.Math.Between(-50, 50), -160);
+        celula.body.setSize(12, 14).setBounce(0.3).setDrag(480, 0);
+        celula.setVelocity(Phaser.Math.Between(-100, 100), -320);
         // Aviso parpadeando y desaparición (con el reloj de la escena: se detienen en la pausa)
         this.time.delayedCall(CURACION.aviso, () => {
             if (celula.active) this.tweens.add({ targets: celula, alpha: 0.2, duration: 120, yoyo: true, repeat: -1 });
@@ -704,21 +704,21 @@ export default class GameScene extends Phaser.Scene {
     crearHud() {
         // Una celda por punto de vida máximo, fija a la cámara
         this.celdasVida = Array.from({ length: JUGADOR.vida }, (_, i) =>
-            this.add.image(6 + i * 9, 6, 'hud-vida', FRAME_VIDA_LLENA)
+            this.add.image(12 + i * 18, 12, 'hud-vida', FRAME_VIDA_LLENA)
                 .setOrigin(0).setScrollFactor(0).setDepth(100)
         );
 
         // Carga del ataque especial (abajo a la derecha): icono apagado y, encima, el cargado
         // recortado desde abajo según el progreso de recarga
         const { width: w, height: h } = this.scale;
-        const x = w - 6 - 16, y = h - 6 - 16;
+        const x = w - 12 - 32, y = h - 12 - 32;
         const hud = o => o.setOrigin(0).setScrollFactor(0).setDepth(100);
         const icono = this.arma.especial.icono;
         this.iconoEspecialFondo = hud(this.add.image(x, y, icono, FRAME_ICONO_VACIO));
         this.iconoEspecial = hud(this.add.image(x, y, icono, FRAME_ICONO_CARGADO));
-        this.textoEspecial = hud(this.add.bitmapText(x - 8, y + 5, 'fuente', 'Q')).setTint(0x47c2c9);
+        this.textoEspecial = hud(this.add.bitmapText(x - 16, y + 10, 'fuente', 'Q')).setTint(0x47c2c9);
         // Arma equipada: "1 PISTOLA", "2 ESPADA"... encima del icono
-        this.textoArma = hud(this.add.bitmapText(w - 6, y - 11, 'fuente', '')).setOrigin(1, 0).setTint(0x667386);
+        this.textoArma = hud(this.add.bitmapText(w - 12, y - 22, 'fuente', '')).setOrigin(1, 0).setTint(0x8794a6);
         this.actualizarHudArma();
     }
 
@@ -770,7 +770,7 @@ export default class GameScene extends Phaser.Scene {
             .setPosition(this.player.x + pose.mano.x * lado, this.player.y + pose.mano.y)
             .setAngle(grados)
             .setFlipY(lado < 0)
-            .setOrigin(2 / this.armaEnMano.width, 0.5);   // agarre en la empuñadura (columna 2, fila central)
+            .setOrigin(4 / this.armaEnMano.width, 0.5);   // agarre en la empuñadura (columna 4, fila central)
     }
 
     // Pose del brazo que se dibuja: en alto durante la carga; con un arma en la mano, apuntando solo
@@ -784,9 +784,9 @@ export default class GameScene extends Phaser.Scene {
     actualizarHudEspecial(time) {
         const total = this.arma.especial.enfriamiento;
         const progreso = Phaser.Math.Clamp(1 - (this.listoEn.especial - time) / total, 0, 1);
-        const alto = Math.round(16 * progreso);
-        this.iconoEspecial.setCrop(0, 16 - alto, 16, alto);
-        this.textoEspecial.setTint(progreso >= 1 ? 0x47c2c9 : 0x4b5768);
+        const alto = Math.round(32 * progreso);
+        this.iconoEspecial.setCrop(0, 32 - alto, 32, alto);
+        this.textoEspecial.setTint(progreso >= 1 ? 0x47c2c9 : 0x667386);
 
         // Destello breve al completar la carga
         if (progreso >= 1 && !this.especialAvisado) {
@@ -972,7 +972,7 @@ export default class GameScene extends Phaser.Scene {
         if (ataque.sprite) return true;   // los proyectiles con sprite propio no llevan fogonazo de pistola
         sonar(this, 'pistola-disparo');
 
-        const destello = this.add.image(x + 3 * direccion.x, y + 3 * direccion.y, 'proyectil', FRAME_DESTELLO)
+        const destello = this.add.image(x + 6 * direccion.x, y + 6 * direccion.y, 'proyectil', FRAME_DESTELLO)
             .setRotation(Math.atan2(direccion.y, direccion.x)).setDepth(11);
         this.time.delayedCall(50, () => destello.destroy());
         return true;
@@ -981,7 +981,7 @@ export default class GameScene extends Phaser.Scene {
     // Distancia libre desde (x, y) en la dirección hasta el primer tile que bloquee de lado o por abajo
     // (las rejillas solo colisionan por arriba y no frenan)
     alcanceLibre(x, y, direccion, maximo) {
-        for (let d = 0; d <= maximo; d += 4) {
+        for (let d = 0; d <= maximo; d += 8) {
             const tile = this.nivel.getTileAtWorldXY(x + d * direccion.x, y + d * direccion.y);
             if (tile && (tile.collideLeft || tile.collideRight || tile.collideDown)) return d;
         }
@@ -1064,7 +1064,7 @@ export default class GameScene extends Phaser.Scene {
     // Lanza el proyectil de un ataque de carga (siempre al frente) y empieza su enfriamiento
     lanzarCargado(ataque, time) {
         const { x, y, direccion } = this.origenDisparo(true);
-        this.lanzarProyectil(ataque.proyectil, x + 6 * direccion.x, y, direccion);
+        this.lanzarProyectil(ataque.proyectil, x + 12 * direccion.x, y, direccion);
         sonar(this, 'espada-onda');
         this.listoEn.especial = time + ataque.enfriamiento;
         this.especialAvisado = false;
@@ -1178,8 +1178,8 @@ export default class GameScene extends Phaser.Scene {
         }
         this.comprobarEmboscadas();
         // Punto de control: se activa al llegar a la terminal (a su altura, no desde otro piso)
-        if (this.terminal && !this.datos.control && this.player.x >= this.terminal.x - 8
-            && Math.abs(this.player.body.bottom - this.terminal.y) < 16) {
+        if (this.terminal && !this.datos.control && this.player.x >= this.terminal.x - 16
+            && Math.abs(this.player.body.bottom - this.terminal.y) < 32) {
             this.activarControl();
         }
 
@@ -1226,7 +1226,7 @@ export default class GameScene extends Phaser.Scene {
 
         // Abajo (↓/S) sobre una rejilla: dejarse caer a través de ella
         if ((JustDown(down) || JustDown(S)) && enSuelo) {
-            const bajo = this.nivel.getTileAtWorldXY(this.player.x, this.player.body.bottom + 1);
+            const bajo = this.nivel.getTileAtWorldXY(this.player.x, this.player.body.bottom + 2);
             if (bajo?.collideUp && !bajo.collideDown) this.atravesarHasta = time + ATRAVESAR;
         }
 

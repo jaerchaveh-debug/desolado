@@ -10,7 +10,7 @@ const FRAME_DISPARO = 10;
 const FRAME_RAYO = 11;
 const FRAME_SALTO = 12;
 const MUESTRA_DISPARO = 200;   // ms que se ve la pose de disparo tras cada bola
-const ALTURA_SALTABLE = 72;    // px por encima de los pies que deben estar libres para saltar un obstáculo
+const ALTURA_SALTABLE = 144;    // px por encima de los pies que deben estar libres para saltar un obstáculo
 const PROFUNDIDAD_EFECTOS = 12;
 
 // Jefe definido en JEFES (src/config/combate.js). Máquina de estados:
@@ -70,7 +70,7 @@ export default class Jefe extends Phaser.Physics.Arcade.Sprite {
     }
 
     mirarAlJugador() {
-        if (Math.abs(this.dx) > 2) this.flipX = this.dx < 0;
+        if (Math.abs(this.dx) > 4) this.flipX = this.dx < 0;
     }
 
     // Punto relativo (mirando a la derecha) en coordenadas del mundo
@@ -198,7 +198,7 @@ export default class Jefe extends Phaser.Physics.Arcade.Sprite {
 
     // Hay un obstáculo delante (una caja) pero libre a la altura del salto (no es un muro)
     puedeSaltar(dir) {
-        const x = dir < 0 ? this.body.left - 4 : this.body.right + 4;
+        const x = dir < 0 ? this.body.left - 8 : this.body.right + 8;
         const tile = this.scene.nivel.getTileAtWorldXY(x, this.body.bottom - ALTURA_SALTABLE);
         return !tile?.collides;
     }
@@ -233,7 +233,7 @@ export default class Jefe extends Phaser.Physics.Arcade.Sprite {
         this.efectoSonoro('zarpazo');
         const delante = this.dx * (this.flipX ? -1 : 1);
         const { alcance, danio } = this.datos.zarpazo;
-        if (delante > -8 && delante < alcance + 10 && Math.abs(this.objetivo.body.bottom - this.body.bottom) < this.datos.cerca.y) {
+        if (delante > -16 && delante < alcance + 20 && Math.abs(this.objetivo.body.bottom - this.body.bottom) < this.datos.cerca.y) {
             this.scene.danarJugador(danio, this.x);
         }
         this.scene.cameras.main.shake(80, 0.006);
@@ -298,11 +298,11 @@ export default class Jefe extends Phaser.Physics.Arcade.Sprite {
         const destino = this.objetivo.body.center;
         const d = Math.hypot(destino.x - origen.x, destino.y - origen.y) || 1;
         const dir = { x: (destino.x - origen.x) / d, y: (destino.y - origen.y) / d };
-        const largo = Math.max(8, this.scene.alcanceLibre(origen.x, origen.y, dir, alcance));
+        const largo = Math.max(16, this.scene.alcanceLibre(origen.x, origen.y, dir, alcance));
 
         // Fase 1: marca fina hacia donde está el jugador ahora
         this.efectoSonoro('rayoAviso');
-        const haz = this.efecto(this.scene.add.tileSprite(origen.x, origen.y, largo, 8, 'rayo-jefe', 0)
+        const haz = this.efecto(this.scene.add.tileSprite(origen.x, origen.y, largo, 16, 'rayo-jefe', 0)
             .setOrigin(0, 0.5).setRotation(Math.atan2(dir.y, dir.x)).setDepth(PROFUNDIDAD_EFECTOS));
         this.scene.tweens.add({ targets: haz, alpha: 0.4, duration: 90, yoyo: true, repeat: -1 });
 
@@ -312,7 +312,7 @@ export default class Jefe extends Phaser.Physics.Arcade.Sprite {
             haz.setAlpha(1).setFrame(1);
             this.efectoSonoro('rayo');
             this.scene.cameras.main.shake(90, 0.006);
-            if (this.distanciaALinea(this.objetivo.body.center, origen, dir, largo) < ancho / 2 + 5) {
+            if (this.distanciaALinea(this.objetivo.body.center, origen, dir, largo) < ancho / 2 + 10) {
                 this.scene.danarJugador(danio, this.x);
             }
             this.despues(duracion, () => {

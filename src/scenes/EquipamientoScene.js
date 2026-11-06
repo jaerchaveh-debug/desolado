@@ -16,12 +16,12 @@ import { sonar } from '../sistema/sonido';
 // Teclado: flechas/WASD para moverse entre casillas (por posición en pantalla),
 // ENTER/E/ESPACIO para equipar o quitar, ESC para volver. Cada cambio se guarda al momento.
 
-const CASILLA = 36;                 // espacios de armas (icono de 32 + 2 px de margen)
-const ESPACIOS = { cx: 96, y: 68, separacion: 44 };
-const FIGURA = { x: 96, y: 96 };   // figura-jugador (80x128), centro superior
-const PANEL = { x: 196, y: 44, ancho: 272, alto: 188 };
-const CELDA = 40;                   // celdas del inventario
-const REJILLA = { columnas: 5, filas: 2, x: 216, y: 66, separacion: 48 };
+const CASILLA = 72;                 // espacios de armas (icono de 64 + 4 px de margen)
+const ESPACIOS = { cx: 192, y: 136, separacion: 88 };
+const FIGURA = { x: 192, y: 192 };   // figura-jugador (160x256), centro superior
+const PANEL = { x: 392, y: 88, ancho: 544, alto: 376 };
+const CELDA = 80;                   // celdas del inventario
+const REJILLA = { columnas: 5, filas: 2, x: 432, y: 132, separacion: 96 };
 const ESPERA = 150;                 // ms sin aceptar teclas al entrar
 
 export default class EquipamientoScene extends MenuBase {
@@ -33,7 +33,7 @@ export default class EquipamientoScene extends MenuBase {
     construir() {
         this.espacios = equipamiento();
         this.obtenidas = armasObtenidas();
-        this.titulo('EQUIPAMIENTO', 20);
+        this.titulo('EQUIPAMIENTO', 40);
 
         // Casillas navegables: { x, y, ancho, alto, tipo: 'espacio' | 'arma' | 'volver', indice | id }
         this.casillas = [];
@@ -41,9 +41,9 @@ export default class EquipamientoScene extends MenuBase {
         // Espacios de armas
         this.vistaEspacios = Array.from({ length: ESPACIOS_ARMAS }, (_, i) => {
             const x = ESPACIOS.cx + (i - 1) * ESPACIOS.separacion;
-            this.texto(x, ESPACIOS.y - CASILLA / 2 - 7, String(i + 1), COLORES.GRIS);
+            this.texto(x, ESPACIOS.y - CASILLA / 2 - 14, String(i + 1), COLORES.GRIS);
             const marco = this.add.rectangle(x, ESPACIOS.y, CASILLA, CASILLA, COLORES.NEGRO, 0.85)
-                .setStrokeStyle(1, COLORES.GRIS_OSCURO);
+                .setStrokeStyle(2, COLORES.GRIS_OSCURO);
             const icono = this.add.image(x, ESPACIOS.y, '__MISSING').setVisible(false);
             this.agregarCasilla(marco, { tipo: 'espacio', indice: i });
             return { marco, icono };
@@ -53,38 +53,38 @@ export default class EquipamientoScene extends MenuBase {
 
         // Inventario
         this.add.rectangle(PANEL.x, PANEL.y, PANEL.ancho, PANEL.alto, COLORES.NEGRO, 0.85).setOrigin(0)
-            .setStrokeStyle(1, COLORES.CIAN_OSCURO);
-        this.add.bitmapText(PANEL.x + 10, PANEL.y + 8, 'fuente', 'INVENTARIO').setTint(COLORES.CIAN);
+            .setStrokeStyle(2, COLORES.CIAN_OSCURO);
+        this.add.bitmapText(PANEL.x + 20, PANEL.y + 16, 'fuente', 'INVENTARIO').setTint(COLORES.CIAN);
         this.vistaArmas = {};
         for (let i = 0; i < REJILLA.columnas * REJILLA.filas; i++) {
             const x = REJILLA.x + CELDA / 2 + (i % REJILLA.columnas) * REJILLA.separacion;
             const y = REJILLA.y + CELDA / 2 + Math.floor(i / REJILLA.columnas) * REJILLA.separacion;
             const id = this.obtenidas[i];
             const marco = this.add.rectangle(x, y, CELDA, CELDA, COLORES.GRIS_PROFUNDO, id ? 0.6 : 0.25)
-                .setStrokeStyle(1, id ? COLORES.GRIS_OSCURO : COLORES.APAGADO);
+                .setStrokeStyle(2, id ? COLORES.GRIS_OSCURO : COLORES.APAGADO);
             if (!id) continue;
             const icono = this.add.image(x, y, ARMAS[id].icono);
             // Número del espacio donde está equipada
-            const numero = this.add.bitmapText(x + CELDA / 2 - 7, y + CELDA / 2 - 9, 'fuente', '').setTint(COLORES.CIAN);
+            const numero = this.add.bitmapText(x + CELDA / 2 - 14, y + CELDA / 2 - 18, 'fuente', '').setTint(COLORES.CIAN);
             this.agregarCasilla(marco, { tipo: 'arma', id });
             this.vistaArmas[id] = { marco, icono, numero };
         }
 
         // Descripción de la casilla bajo el cursor
-        const yInfo = REJILLA.y + REJILLA.filas * REJILLA.separacion + 4;
-        this.add.rectangle(PANEL.x + 10, yInfo, PANEL.ancho - 20, 1, COLORES.CIAN_OSCURO).setOrigin(0);
-        this.infoNombre = this.add.bitmapText(PANEL.x + 10, yInfo + 10, 'fuente', '').setTint(COLORES.BLANCO);
-        this.infoLineas = [0, 1].map(i => this.add.bitmapText(PANEL.x + 10, yInfo + 26 + i * 12, 'fuente', ''));
+        const yInfo = REJILLA.y + REJILLA.filas * REJILLA.separacion + 8;
+        this.add.rectangle(PANEL.x + 20, yInfo, PANEL.ancho - 40, 2, COLORES.CIAN_OSCURO).setOrigin(0);
+        this.infoNombre = this.add.bitmapText(PANEL.x + 20, yInfo + 20, 'fuente', '').setTint(COLORES.BLANCO);
+        this.infoLineas = [0, 1].map(i => this.add.bitmapText(PANEL.x + 20, yInfo + 52 + i * 24, 'fuente', ''));
         this.indice = 0;
 
         // Volver y avisos
-        const volver = this.texto(FIGURA.x, 240, 'VOLVER', COLORES.GRIS);
+        const volver = this.texto(FIGURA.x, 480, 'VOLVER', COLORES.GRIS);
         this.agregarCasilla(volver, { tipo: 'volver' });
-        this.aviso = this.texto(PANEL.x + PANEL.ancho / 2, 240, 'EQUIPA AL MENOS UN ARMA', COLORES.ROJO).setVisible(false);
+        this.aviso = this.texto(PANEL.x + PANEL.ancho / 2, 480, 'EQUIPA AL MENOS UN ARMA', COLORES.ROJO).setVisible(false);
         this.pie('CLIC / ENTER EQUIPAR O QUITAR   FLECHAS MOVERSE   ESC VOLVER');
 
         // Cursor de teclado: marco cian que rodea la casilla activa
-        this.foco = this.add.rectangle(0, 0, 0, 0).setStrokeStyle(1, COLORES.CIAN).setFillStyle();
+        this.foco = this.add.rectangle(0, 0, 0, 0).setStrokeStyle(2, COLORES.CIAN).setFillStyle();
         this.tweens.add({ targets: this.foco, alpha: 0.4, duration: 300, yoyo: true, repeat: -1 });
         this.enfocar(this.casillas.findIndex(c => c.tipo === 'arma'));
 
@@ -120,7 +120,7 @@ export default class EquipamientoScene extends MenuBase {
         this.indice = i;
         const { objeto } = this.casillas[i];
         const b = objeto.getBounds();
-        this.foco.setPosition(Math.round(b.centerX), Math.round(b.centerY)).setSize(b.width + 4, b.height + 4);
+        this.foco.setPosition(Math.round(b.centerX), Math.round(b.centerY)).setSize(b.width + 8, b.height + 8);
         this.foco.setOrigin(0.5);
         this.refrescarInfo();
     }
@@ -181,7 +181,7 @@ export default class EquipamientoScene extends MenuBase {
             const id = this.espacios[i];
             icono.setVisible(Boolean(id));
             if (id) icono.setTexture(ARMAS[id].icono);
-            marco.setStrokeStyle(1, id ? COLORES.CIAN_OSCURO : COLORES.GRIS_OSCURO);
+            marco.setStrokeStyle(2, id ? COLORES.CIAN_OSCURO : COLORES.GRIS_OSCURO);
         });
         for (const [id, { icono, numero }] of Object.entries(this.vistaArmas)) {
             const espacio = this.espacios.indexOf(id);

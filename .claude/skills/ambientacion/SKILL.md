@@ -40,7 +40,7 @@ Capas de ancho repetible (múltiplo de 16; los bordes izquierdo y derecho deben 
 
 ```js
 // Capa fija a la cámara cuyo patrón se desplaza más lento que el mundo
-const capa = this.add.tileSprite(0, 0, 480, 270, 'fondo-lejano')
+const capa = this.add.tileSprite(0, 0, 960, 540, 'fondo-lejano')
     .setOrigin(0).setScrollFactor(0).setDepth(-40);
 // en update():
 capa.tilePositionX = this.cameras.main.scrollX * 0.2;   // 0.2 lejana · 0.5 media · 0.8 cercana
@@ -54,7 +54,7 @@ Para estructuras sueltas que no se repiten, usa `this.add.image(...).setScrollFa
 Bandas horizontales semitransparentes **en tiempo de ejecución** (el PNG sigue sin alfa parcial; el alfa lo pone Phaser):
 
 ```js
-this.add.tileSprite(0, 200, 480, 70, 'niebla')
+this.add.tileSprite(0, 400, 960, 140, 'niebla')
     .setOrigin(0).setScrollFactor(0).setAlpha(0.35).setDepth(-5);
 // update(): niebla.tilePositionX += 0.05;   // deriva muy lenta
 ```
@@ -65,7 +65,7 @@ this.add.tileSprite(0, 200, 480, 70, 'niebla')
 // Polvo en suspensión: 1 px, lento, poco
 this.add.particles(0, 0, 'particula', {
     frame: 0,
-    x: { min: 0, max: 480 }, y: { min: 0, max: 270 },
+    x: { min: 0, max: 960 }, y: { min: 0, max: 540 },
     lifespan: 6000, speedX: { min: -4, max: 4 }, speedY: { min: 2, max: 8 },
     alpha: { start: 0.6, end: 0 }, frequency: 120, quantity: 1
 }).setScrollFactor(0.9).setDepth(20);

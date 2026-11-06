@@ -327,6 +327,23 @@ export class Lienzo {
         return l;
     }
 
+    // Scale2x (EPX): copia al doble de tamaño que suaviza las diagonales y no crea colores nuevos
+    ampliado() {
+        const r = new Lienzo(this.ancho * 2, this.alto * 2);
+        const c = (x, y) => this.color(x, y);
+        for (let y = 0; y < this.alto; y++) {
+            for (let x = 0; x < this.ancho; x++) {
+                const e = c(x, y), arriba = c(x, y - 1), abajo = c(x, y + 1), izq = c(x - 1, y), der = c(x + 1, y);
+                const distintos = arriba !== abajo && izq !== der;
+                r.px[y * 2][x * 2] = distintos && izq === arriba ? izq : e;
+                r.px[y * 2][x * 2 + 1] = distintos && arriba === der ? der : e;
+                r.px[y * 2 + 1][x * 2] = distintos && izq === abajo ? izq : e;
+                r.px[y * 2 + 1][x * 2 + 1] = distintos && abajo === der ? der : e;
+            }
+        }
+        return r;
+    }
+
     aRGBA(escala = 1) {
         const w = this.ancho * escala, h = this.alto * escala;
         const rgba = new Uint8Array(w * h * 4);

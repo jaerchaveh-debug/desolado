@@ -19,11 +19,15 @@ Todo el arte se define en `arte/<nombre>.js` y se convierte en PNG con `npm run 
   - Textura y tono: `tramado(x, y, w, h, c, densidad)` (Bayer 4x4; usa coordenadas absolutas, así que zonas contiguas casan); `degradado(x, y, w, h, '2345', { vertical, invertir, costura, zona })`: bandas de colores con las costuras tramadas (`costura: 0` = bandas limpias); `oscurecer(zona, pasos)` / `aclarar(zona, pasos)` / `tono(pasos, zona)`: mueven cada píxel por su rampa, sin salirse de ella. Una **zona** es una función `(x, y) => bool`, un rectángulo `{ x, y, w, h }` o nada (todo el lienzo).
   - `contorno(c, { diagonales })`: contorno exterior alrededor de todo lo opaco (normalmente `'0'`). Aplicarlo al final, sobre la figura completa.
   - Ilustraciones (skill `ilustracion`): `entintar(c, { lados, irregular, semilla })`, contorno de 1 px más un segundo píxel en los lados de sombra, con huecos por ruido (tinta de grosor variable); `trazos(zona, c, { separacion, inclinacion, rotura, semilla })`, sombreado con líneas paralelas rotas sobre lo opaco de la zona.
-  - Copias y variantes: `copia()`, `recolor({ g: 'j', f: 'i' })` (copia con colores sustituidos: variantes de enemigos), `simetrico()` (refleja la mitad izquierda sobre la derecha: dibujar solo media figura), `pegar(otro, dx, dy)`, `desplazado(dy)`, `espejo()`.
+  - Copias y variantes: `copia()`, `recolor({ g: 'j', f: 'i' })` (copia con colores sustituidos: variantes de enemigos), `simetrico()` (refleja la mitad izquierda sobre la derecha: dibujar solo media figura), `pegar(otro, dx, dy)`, `desplazado(dy)`, `espejo()`, `ampliado()` (copia al doble con Scale2x: la usa el generador con el arte antiguo y `arte/fuente.js`).
 - `generar.js`: genera la hoja PNG, la vista previa x8 en `arte/preview/` y el manifiesto `src/assets/sprites.json`.
 - `revisar.js`: valida los PNG contra la guía.
 - `ver.js` (`npm run arte:ver [nombre]`): visor en vivo en http://localhost:4321 (`PUERTO` para cambiarlo). Regenera al guardar `arte/`, `tools/pixel/` o `src/config/`, muestra cada frame numerado y las animaciones a su fps sobre fondo neutro, negro o de muro, y los errores de generación. Pensado para el usuario mientras dibuja; no sustituye a mirar la vista previa con Read.
 - `texto.js` (`npm run arte:texto nombre [frame] [hasta]`): vuelca los frames como caracteres de la paleta con regla de coordenadas, para comprobar posiciones exactas (boca del cañón, puño, hitbox) sin adivinar en la imagen.
+
+## Resolución
+
+El juego va a 960x540. Todo arte nuevo lleva `hd: true` y se dibuja a tamaño real. Las definiciones sin `hd` son arte antiguo de 480x270: `generar.js` las amplía x2 con Scale2x y las marca `ampliado` en el manifiesto, que es la lista de lo pendiente de redibujar (`revisar.js` no les aplica el aviso de "parece ampliado"). Para redibujar una: doblar sus coordenadas, aprovechar el espacio para más detalle y añadir `hd: true`.
 
 ## Formato de una definición
 
@@ -32,7 +36,8 @@ import { Lienzo, ruido } from '../tools/pixel/lienzo.js';
 
 export default {
     nombre: 'mi-sprite',       // = nombre del archivo; es la clave de textura en Phaser
-    tipo: 'sprite',            // o 'tileset' (frames de 16x16)
+    tipo: 'sprite',            // o 'tileset' (frames de 32x32)
+    hd: true,                  // dibujado a tamaño real (960x540); sin esto, el generador lo amplía x2
     ancho: 16, alto: 32,       // tamaño de cada frame
     frames: () => [ /* Lienzo, Lienzo, ... */ ],
     animaciones: {             // opcional; en Phaser queda como '<nombre>-<animacion>'

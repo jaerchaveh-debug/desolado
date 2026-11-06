@@ -2,12 +2,12 @@
   "type": "tileset",
   "name": "tiles-pasillo",
   "image": "tiles-pasillo.png",
-  "imagewidth": 640,
-  "imageheight": 16,
-  "tilewidth": 16,
-  "tileheight": 16,
-  "tilecount": 40,
-  "columns": 40,
+  "imagewidth": 1408,
+  "imageheight": 32,
+  "tilewidth": 32,
+  "tileheight": 32,
+  "tilecount": 44,
+  "columns": 44,
   "margin": 0,
   "spacing": 0,
   "tiles": [
@@ -146,6 +146,46 @@
       "properties": [
         {
           "name": "soloArriba",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 40,
+      "properties": [
+        {
+          "name": "solido",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 41,
+      "properties": [
+        {
+          "name": "solido",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 42,
+      "properties": [
+        {
+          "name": "solido",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 43,
+      "properties": [
+        {
+          "name": "solido",
           "type": "bool",
           "value": true
         }

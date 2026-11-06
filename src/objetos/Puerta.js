@@ -63,12 +63,12 @@ export default class Puerta extends Phaser.Physics.Arcade.Sprite {
         sonar(this.scene, 'puerta-rota', { x: this.x });
         const { x, y } = this.getCenter();
         for (let i = 0; i < PIEZAS_CHATARRA; i++) {
-            const pieza = this.scene.add.image(x + Phaser.Math.Between(-4, 4), y + Phaser.Math.Between(-24, 24), 'chatarra', i % 3)
+            const pieza = this.scene.add.image(x + Phaser.Math.Between(-8, 8), y + Phaser.Math.Between(-48, 48), 'chatarra', i % 3)
                 .setDepth(12);
             this.scene.tweens.add({
                 targets: pieza,
-                x: pieza.x + Phaser.Math.Between(-60, 60),
-                y: this.y + Phaser.Math.Between(-4, 0),
+                x: pieza.x + Phaser.Math.Between(-120, 120),
+                y: this.y + Phaser.Math.Between(-8, 0),
                 angle: Phaser.Math.Between(-360, 360),
                 duration: Phaser.Math.Between(350, 600),
                 ease: 'Quad.easeIn'
